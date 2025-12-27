@@ -1,0 +1,16 @@
+services:
+  db:
+    build:
+      context: ../database/
+      dockerfile: ../database/db.Dockerfile
+    image: electronmaildb
+    container_name: em_db
+    volumes:
+      - em-db-data:/opt/oracle
+
+    environment:
+      ORACLE_PWD: password #tymczasowe hasło
+    ports:
+      - "1521:1521"
+volumes:
+  em-db-data:
