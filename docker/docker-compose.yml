@@ -2,7 +2,7 @@ services:
   db:
     build:
       context: ../database/
-      dockerfile: ../database/db.Dockerfile
+      dockerfile: db.Dockerfile
     image: electronmaildb
     container_name: em_db
     volumes:
@@ -12,5 +12,13 @@ services:
       ORACLE_PWD: password #tymczasowe hasło
     ports:
       - "1521:1521"
+  frontend:
+    build:
+      context: ../frontend/
+      dockerfile: frontend.Dockerfile
+    image: electronmailfrontend
+    container_name: em_frontend
+    ports:
+      - "4200:8080"
 volumes:
   em-db-data:
