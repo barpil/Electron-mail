@@ -1,0 +1,50 @@
+<mat-card appearance="outlined">
+    <mat-card-header>
+        <mat-card-title>Sign in</mat-card-title>
+    </mat-card-header>
+    <form (submit)="submitLoginForm(); $event.preventDefault()">
+        <mat-card-content class="login-card">
+            <mat-form-field [floatLabel]="'auto'">
+                <mat-label>Email</mat-label>
+                <input matInput placeholder="email@mail.com" type="email" [field]="loginForm.email"/>
+
+                @if(loginForm.email().touched()){
+                    <mat-error>
+                        @if(loginForm.email().errors().at(0)?.kind === "required"){
+                            Email is required
+                        } @else if (loginForm.email().errors().at(0)?.kind === "email"){
+                            Please enter a valid email
+                        }
+                    </mat-error>
+                }
+            </mat-form-field>
+
+
+            <mat-form-field [floatLabel]="'auto'">
+                <mat-label>Password</mat-label>
+                <input matInput placeholder="password" type="password" [field]="loginForm.password"/>
+                @if(loginForm.password().invalid() && loginForm.password().touched()){
+                    <mat-error>Password is required</mat-error>
+                }
+            </mat-form-field>
+
+        </mat-card-content>
+        <mat-card-actions>
+            <button
+                    mat-raised-button
+                    type="submit"
+                    [disabled]="loginForm().invalid()"
+            >
+                @if(isLoading){
+                    <mat-spinner diameter="20"/>
+                }@else{
+                    Log in
+                }
+            </button>
+        </mat-card-actions>
+    </form>
+
+    @if(loginForm().errors().at(0)?.kind === "logging-error"){
+        <mat-error>{{loginForm().errors().at(0)!.message}}</mat-error>
+    }
+</mat-card>
