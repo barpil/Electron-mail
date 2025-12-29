@@ -1,0 +1,46 @@
+
+mat-card{
+    width: fit-content;
+}
+
+.card-content{
+    display: grid;
+    grid-template-columns: 400px 300px;
+    grid-template-rows: repeat(4, 75px);
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+}
+
+
+.input-fields{
+    grid-area: 1 / 1 / 5 / 2;
+    display: flex;
+    flex-direction: column;
+    gap: 5px
+}
+
+.input-fields mat-form-field{
+    width: 90%
+}
+
+.input-field-with-spinner{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px
+
+}
+.input-field-with-spinner mat-spinner{
+    transform: translateY(-10px);
+}
+
+
+.password-strength-info{
+    grid-area: 2 / 2 / 5 / 3;
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+

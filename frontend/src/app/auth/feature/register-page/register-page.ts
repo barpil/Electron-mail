@@ -1,8 +1,11 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
+import {RegisterForm} from "./register-form/register-form";
 
 @Component({
   selector: 'app-register-page',
-  imports: [],
+    imports: [
+        RegisterForm
+    ],
   templateUrl: './register-page.html',
   styleUrl: './register-page.css',
 })

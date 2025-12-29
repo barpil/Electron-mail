@@ -1,0 +1,90 @@
+<mat-card appearance="outlined">
+    <mat-card-header>
+        <mat-card-title>Sign up</mat-card-title>
+    </mat-card-header>
+    <form (submit)="submitRegisterForm(); $event.preventDefault()">
+        <mat-card-content class="card-content">
+            <div class="input-fields">
+                <div class="input-field-with-spinner">
+                    <mat-form-field [floatLabel]="'auto'">
+                        <mat-label>Email</mat-label>
+                        <input matInput placeholder="email" [field]="registerForm.email"/>
+                        @if (registerForm.email().errors().length !== 0) {
+                            <mat-error>{{ registerForm.email().errors().at(0)?.message ?? 'Unexpected error' }}</mat-error>
+                        }
+
+                    </mat-form-field>
+                    @if (registerForm.email().pending()) {
+                        <mat-spinner diameter="20"></mat-spinner>
+                    }
+                </div>
+
+                <div class="input-field-with-spinner">
+                    <mat-form-field [floatLabel]="'auto'">
+                        <mat-label>Username</mat-label>
+                        <input matInput placeholder="username" [field]="registerForm.username"/>
+                        @if (registerForm.username().errors().length !== 0) {
+                            <mat-error>{{ registerForm.username().errors().at(0)?.message ?? 'Unexpected error' }}</mat-error>
+                        }
+
+                    </mat-form-field>
+                    @if (registerForm.username().pending()) {
+                        <mat-spinner diameter="20"></mat-spinner>
+                    }
+                </div>
+
+                <mat-form-field [floatLabel]="'auto'">
+                    <mat-label>Password</mat-label>
+                    <input matInput placeholder="password" type="password" [field]="registerForm.password"/>
+                    @if (registerForm.password().invalid() && registerForm.password().touched()) {
+                        <mat-error>Password is required</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field [floatLabel]="'auto'">
+                    <mat-label>Confirm password</mat-label>
+                    <input matInput placeholder="confirm password" type="password"
+                           [field]="registerForm.confirmPassword"/>
+                    @if (registerForm.confirmPassword().invalid() && registerForm.confirmPassword().touched()) {
+                        <mat-error>Passwords does not match</mat-error>
+                    }
+                </mat-form-field>
+            </div>
+            @if (registerForm.password().dirty()) {
+                <div class="password-strength-info">
+                    <app-password-strength-checker
+                            [errorsToDisplay]="[
+                                customError({message: 'Must be at least 8 characters long', kind: 'too-short'}),
+                                customError({message: 'Must contain a lowercase letter (a-z)', kind: 'no-lowercase'}),
+                                customError({message: 'Must contain an uppercase letter (A-Z)', kind: 'no-uppercase'}),
+                                customError({message: 'Must contain a digit (0-9)', kind: 'no-digit'}),
+                                customError({message: 'Must contain a special character (!@#$%^&*)', kind: 'no-special'})
+                            ]"
+                            [currentErrors]="registerForm.password().errors()">
+                    </app-password-strength-checker>
+                </div>
+
+            }
+
+        </mat-card-content>
+        <mat-card-actions>
+            <button
+                    mat-raised-button
+                    type="submit"
+                    [disabled]="registerForm().invalid() || registerForm().pending()"
+            >
+                @if (isLoading) {
+                    <mat-spinner diameter="20"/>
+                } @else {
+                    Register
+                }
+            </button>
+        </mat-card-actions>
+    </form>
+
+    @if (registerForm().errors().at(0)?.kind === "register-error") {
+        <mat-error>{{ registerForm().errors().at(0)!.message }}</mat-error>
+    }
+</mat-card>
+
+

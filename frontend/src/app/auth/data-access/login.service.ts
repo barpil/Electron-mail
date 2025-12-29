@@ -11,7 +11,7 @@ export class LoginService {
   login(loginFormModel: LoginFormModel){
       //dummy login
       let result = false;
-      if(loginFormModel.email === "admin@email.com" && loginFormModel.password === "password"){
+      if(loginFormModel.email === "admin@electron.pl" && loginFormModel.password === "password"){
           result = true;
       }
       return of(result).pipe(

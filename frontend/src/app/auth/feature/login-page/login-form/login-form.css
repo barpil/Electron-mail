@@ -1,4 +1,28 @@
-.login-card{
+mat-card{
+    width: fit-content;
+}
+
+.card-content{
+    display: grid;
+    grid-template-columns: 400px;
+    grid-template-rows: 200px;
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+}
+
+
+.input-fields{
+    grid-area: 1 / 1 / 2 / 2;
     display: flex;
     flex-direction: column;
+    gap: 5px
 }
+
+.input-fields mat-form-field{
+    width: 100%
+}
+
+
+
+
+

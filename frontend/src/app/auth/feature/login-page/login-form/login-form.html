@@ -3,30 +3,32 @@
         <mat-card-title>Sign in</mat-card-title>
     </mat-card-header>
     <form (submit)="submitLoginForm(); $event.preventDefault()">
-        <mat-card-content class="login-card">
-            <mat-form-field [floatLabel]="'auto'">
-                <mat-label>Email</mat-label>
-                <input matInput placeholder="email@mail.com" type="email" [field]="loginForm.email"/>
+        <mat-card-content class="card-content">
+            <div class="input-fields">
+                <mat-form-field [floatLabel]="'auto'">
+                    <mat-label>Username</mat-label>
+                    <input matInput placeholder="username"  [field]="loginForm.email"/>
 
-                @if(loginForm.email().touched()){
-                    <mat-error>
-                        @if(loginForm.email().errors().at(0)?.kind === "required"){
-                            Email is required
-                        } @else if (loginForm.email().errors().at(0)?.kind === "email"){
-                            Please enter a valid email
-                        }
-                    </mat-error>
-                }
-            </mat-form-field>
+                    @if(loginForm.email().touched()){
+                        <mat-error>
+                            @if(loginForm.email().errors().at(0)?.kind === "required"){
+                                Email is required
+                            } @else if (loginForm.email().errors().at(0)?.kind === "email"){
+                                Please enter a valid email
+                            }
+                        </mat-error>
+                    }
+                </mat-form-field>
 
 
-            <mat-form-field [floatLabel]="'auto'">
-                <mat-label>Password</mat-label>
-                <input matInput placeholder="password" type="password" [field]="loginForm.password"/>
-                @if(loginForm.password().invalid() && loginForm.password().touched()){
-                    <mat-error>Password is required</mat-error>
-                }
-            </mat-form-field>
+                <mat-form-field [floatLabel]="'auto'">
+                    <mat-label>Password</mat-label>
+                    <input matInput placeholder="password" type="password" [field]="loginForm.password"/>
+                    @if(loginForm.password().invalid() && loginForm.password().touched()){
+                        <mat-error>Password is required</mat-error>
+                    }
+                </mat-form-field>
+            </div>
 
         </mat-card-content>
         <mat-card-actions>
