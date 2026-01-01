@@ -45,7 +45,7 @@ export class LoginForm {
         submit(this.loginForm, async form => {
             try {
                 await firstValueFrom(this.loginService.login(form().value()))
-                if (!await this.router.navigate(['/home'])) {
+                if (!await this.router.navigate(['/inbox'])) {
                     throw new Error('Routing failed')
                 }
                 return undefined; //jesli undefined to wszystko zadzialalo

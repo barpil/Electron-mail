@@ -1,0 +1,27 @@
+@if (isLoading()) {
+    <div class="loading-container">
+        <mat-spinner strokeWidth="7" diameter="100"></mat-spinner>
+    </div>
+} @else {
+    <mat-nav-list class="message-list">
+        @for (message of messages(); track message.id) {
+            <a mat-list-item
+               [activated]="!message.isRead"
+               [routerLink]="['.', message.id]"
+               (click)="$event.preventDefault()"
+            >
+            <span matListItemTitle class="message-header">
+                <span class="sender-name">{{ message.sender }}</span>
+                <span class="message-date">{{ message.date | date:'shortDate' }}</span>
+            </span>
+
+                <span matListItemLine class="message-subject">
+            {{ message.subject }}
+            </span>
+            </a>
+            <mat-divider></mat-divider>
+        } @empty {
+            <div class="empty-state">Message list is empty!</div>
+        }
+    </mat-nav-list>
+}

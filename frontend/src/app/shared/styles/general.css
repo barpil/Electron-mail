@@ -1,7 +1,7 @@
 .icon-text-in-line{
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    gap: 10px
+    column-gap: 5px;
 }

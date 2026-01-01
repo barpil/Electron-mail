@@ -1,0 +1,30 @@
+<mat-sidenav-container class="sidenav-container">
+
+    <mat-sidenav mode="side" opened class="mail-sidenav">
+
+        <div class="new-message-wrapper">
+            <button matButton class="new-message-btn">
+                <div class="icon-text-in-line">
+                    <mat-icon>edit</mat-icon>
+                    <span>New message</span>
+                </div>
+            </button>
+        </div>
+
+        <mat-nav-list>
+            @for (folder of folders(); track folder.label) {
+                <a mat-list-item
+                   [routerLink]="folder.route"
+                   [queryParams]="folder.queryParams"
+                   routerLinkActive="active-link"
+                   class="icon-text-in-line"
+                >
+                    <mat-icon matListItemIcon>{{ folder.icon }}</mat-icon>
+                    <span matListItemTitle>{{ folder.label }}</span>
+                </a>
+            }
+        </mat-nav-list>
+
+    </mat-sidenav>
+
+</mat-sidenav-container>

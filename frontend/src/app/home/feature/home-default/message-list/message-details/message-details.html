@@ -1,0 +1,36 @@
+<div class="message-wrapper">
+    @if (isLoading()) {
+        <div class="loading-container">
+            <mat-spinner strokeWidth="7" diameter="100"></mat-spinner>
+        </div>
+    } @else if (message(); as msg) {
+        <div class="message-container">
+            <header class="message-header">
+                <h1 class="subject-title">{{ msg.subject }}</h1>
+            </header>
+
+            <div class="meta-section">
+                <div class="sender-info">
+                    <div class="sender-details">
+                        <div style="display: flex;flex-direction: row;gap: 6px;">
+                            <span>From:</span>
+                            <span class="sender-name">{{ msg.sender }}</span>
+                        </div>
+
+                        <span class="date-label">{{ msg.date | date:'medium' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <article class="message-content">
+                {{ msg.content }}
+            </article>
+
+            <footer class="message-footer">
+                <span>TU BEDA ZALACZNIKI</span>
+            </footer>
+        </div>
+    }
+</div>
