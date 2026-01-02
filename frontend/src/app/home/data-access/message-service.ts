@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
-import {delay, of} from "rxjs";
+import {debounce, delay, interval, of} from "rxjs";
+import {NewMessageFormModel} from "../feature/home-default/new-message-form/new-message-form";
 
 @Injectable({
     providedIn: 'root',
@@ -34,7 +35,7 @@ export class MessageService {
         )
     }
 
-    getSentMessages(){
+    getSentMessages() {
         //dummy response
         const response: GetMessagesResponse = {
             messages:
@@ -63,10 +64,10 @@ export class MessageService {
         )
     }
 
-    getMessageDetails(messageId: string){
+    getMessageDetails(messageId: string) {
         //dummy response
         let result: MessageDetails;
-        switch (messageId){
+        switch (messageId) {
             case "1":
                 result = {
                     id: 1,
@@ -78,7 +79,7 @@ export class MessageService {
                 }
                 break;
             case "2":
-                result =  {
+                result = {
                     id: 2,
                     sender: 'Jan Kowalski',
                     subject: 'Faktura za usługi',
@@ -98,7 +99,7 @@ export class MessageService {
                 }
                 break;
             case "4":
-                result= {
+                result = {
                     id: 2,
                     sender: 'You',
                     subject: 'Droga Aniu znowu',
@@ -112,9 +113,23 @@ export class MessageService {
         }
         return of(result);
     }
+
+    sendMessage(messageForm: NewMessageFormModel) {
+        console.log(`Message sent:
+        ${messageForm.recipient}
+        ${messageForm.subject}
+        ${messageForm.content}
+        ${messageForm.attachments}`)
+        return of(messageForm).pipe(
+            debounce(() => interval(500)),
+            delay(1000)
+        )
+    }
+
 }
 
-export class MessageNotFoundError extends Error{}
+export class MessageNotFoundError extends Error {
+}
 
 
 export interface GetMessagesRequest {
@@ -133,7 +148,7 @@ export interface MessageListItem {
     isRead: boolean;
 }
 
-export interface MessageDetails{
+export interface MessageDetails {
     id: number;
     sender: string;
     subject: string;

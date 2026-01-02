@@ -44,9 +44,9 @@ export class LoginForm {
         this.isLoading = true;
         submit(this.loginForm, async form => {
             try {
-                await firstValueFrom(this.loginService.login(form().value()))
+                await firstValueFrom(this.loginService.login(form().value()));
                 if (!await this.router.navigate(['/inbox'])) {
-                    throw new Error('Routing failed')
+                    throw new Error('Routing failed');
                 }
                 return undefined; //jesli undefined to wszystko zadzialalo
             } catch (error) {
@@ -54,7 +54,7 @@ export class LoginForm {
                     return customError({
                         message: 'Passed email or password is incorrect',
                         kind: "logging-error"
-                    })
+                    });
                 }
 
                 return customError({
@@ -63,7 +63,7 @@ export class LoginForm {
                 })
             }
         }).then(() => {
-            this.isLoading = false
+            this.isLoading = false;
         });
 
     }

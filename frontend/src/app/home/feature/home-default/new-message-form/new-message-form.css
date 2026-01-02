@@ -1,0 +1,76 @@
+.message-wrapper {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 24px;
+    background-color: #f5f5f5;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.compose-card {
+    width: 100%;
+    max-height: calc(100vh - 250px);
+    display: flex;
+    flex-direction: column;
+}
+
+.compose-card form {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px !important;
+}
+
+.input-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.attachment-section {
+    margin-top: 16px;
+    padding: 16px;
+    background-color: #fafafa;
+    border-radius: 4px;
+    border: 1px dashed #ccc;
+}
+
+.attachment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+mat-card-actions {
+    padding: 16px !important;
+    gap: 12px;
+    background: #fff;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.global-error-text {
+    color: #f44336;
+    font-size: 0.85rem;
+    margin-right: auto;
+}
+
+.custom-error-margin {
+    font-size: 0.75rem;
+    margin-top: 8px;
+    display: block;
+}
+
+mat-spinner {
+    display: inline-block;
+}

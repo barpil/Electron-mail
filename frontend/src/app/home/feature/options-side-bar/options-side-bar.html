@@ -3,7 +3,10 @@
     <mat-sidenav mode="side" opened class="mail-sidenav">
 
         <div class="new-message-wrapper">
-            <button matButton class="new-message-btn">
+            <button
+                    matButton class="new-message-btn"
+                    [routerLink]="newMessageLink.route"
+            >
                 <div class="icon-text-in-line">
                     <mat-icon>edit</mat-icon>
                     <span>New message</span>

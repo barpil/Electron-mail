@@ -1,0 +1,103 @@
+<div class="message-wrapper">
+    <mat-card appearance="outlined" class="compose-card">
+        <mat-card-header>
+            <mat-card-title>New Message</mat-card-title>
+        </mat-card-header>
+
+        <form (submit)="onSend(); $event.preventDefault()">
+            <mat-card-content class="card-content">
+                <div class="input-fields">
+                    <mat-form-field appearance="fill">
+                        <mat-label>To</mat-label>
+                        <input matInput
+                               placeholder="Message recipient's username"
+                               [field]="newMessageForm.recipient">
+                        @if (newMessageForm.recipient().touched() && newMessageForm.recipient().invalid()) {
+                            <mat-error>{{ newMessageForm.recipient().errors().at(0)?.message }}</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill">
+                        <mat-label>Subject</mat-label>
+                        <input matInput
+                               placeholder="Message subject"
+                               [field]="newMessageForm.subject">
+                        @if (newMessageForm.subject().touched() && newMessageForm.subject().invalid()) {
+                            <mat-error>{{ newMessageForm.subject().errors().at(0)?.message }}</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill">
+                        <mat-label>Message</mat-label>
+                        <textarea matInput
+                                  rows="8"
+                                  cdkTextareaAutosize
+                                  cdkAutosizeMinRows="8"
+                                  cdkAutosizeMaxRows="50"
+                                  placeholder="Type your message..."
+                                  [field]="newMessageForm.content"></textarea>
+                        @if (newMessageForm.content().touched() && newMessageForm.content().invalid()) {
+                            <mat-error>{{ newMessageForm.content().errors().at(0)?.message }}</mat-error>
+                        }
+                        <mat-hint align="end">{{ formModel().content.length }} / 2048</mat-hint>
+                    </mat-form-field>
+                </div>
+
+                <div class="attachment-section">
+                    <div class="attachment-header">
+                        <span>Attachments ({{ formModel().attachments.length }}/5)</span>
+                        <input type="file" #fileInput hidden multiple (change)="onFileSelected($event)">
+                        <button mat-stroked-button type="button" (click)="fileInput.click()" [disabled]="isLoading()">
+                            <mat-icon>attach_file</mat-icon>
+                            Add Files
+                        </button>
+                    </div>
+
+
+                    <mat-chip-grid class="attachment-chips">
+                        @for (file of formModel().attachments; track $index) {
+                            <mat-chip-row [removable]="true" (removed)="removeAttachment($index)">
+                                <mat-icon matChipAvatar>insert_drive_file</mat-icon>
+                                {{ file.name }}
+                                <button matChipRemove type="button">
+                                    <mat-icon>cancel</mat-icon>
+                                </button>
+                            </mat-chip-row>
+                        }
+                    </mat-chip-grid>
+
+
+                    @if (newMessageForm.attachments().invalid()) {
+                        <mat-error class="custom-error-margin">
+                            {{ newMessageForm.attachments().errors().at(0)?.message }}
+                        </mat-error>
+                    }
+                </div>
+            </mat-card-content>
+
+            <mat-divider></mat-divider>
+
+            <mat-card-actions align="end" class="actions-panel">
+                @if (newMessageForm().errors().at(0)?.kind === "message-sending-error") {
+                    <span class="global-error-text">
+                        {{ newMessageForm().errors().at(0)!.message }}
+                    </span>
+                }
+
+                <button mat-raised-button
+                        color="primary"
+                        type="submit"
+                        [disabled]="newMessageForm().invalid() || isLoading()">
+                    @if (isLoading()) {
+                        <mat-spinner diameter="20"></mat-spinner>
+                    } @else {
+                        <div class="icon-text-in-line">
+                            <mat-icon>send</mat-icon>
+                            Send Message
+                        </div>
+                    }
+                </button>
+            </mat-card-actions>
+        </form>
+    </mat-card>
+</div>

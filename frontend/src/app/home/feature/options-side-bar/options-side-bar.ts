@@ -29,6 +29,8 @@ export class OptionsSideBar {
         {label: 'Received', icon: 'inbox', route: '/inbox', queryParams: {}},
         {label: 'Sent', icon: 'send', route: '/inbox', queryParams: {type: 'sent'}},
     ]);
+
+    readonly newMessageLink = {route: '/inbox/new-message'}
 }
 
 interface NavItem {

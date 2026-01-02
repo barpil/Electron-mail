@@ -1,5 +1,5 @@
 import {
-    customError, email,
+    customError, email, maxLength,
     minLength,
     required,
     schema,
@@ -24,6 +24,7 @@ export const registerFormSchema = schema<RegisterFormModel>((rootPath) => {
 
     required(rootPath.email, {message: "Email is required"});
     minLength(rootPath.email, 8, {message: "Email must be at least 8 characters long"});
+    maxLength(rootPath.email, 50, {message: "This email is too long (max 50 characters)"})
     email(rootPath.email, {message: "Please enter a valid email"})
 
     validateAsync(rootPath.email, {
@@ -60,6 +61,7 @@ export const registerFormSchema = schema<RegisterFormModel>((rootPath) => {
 
     required(rootPath.username, {message: "Username is required"});
     minLength(rootPath.username, 8, {message: "Username must be at least 8 characters long"});
+    maxLength(rootPath.username, 50, {message: "This username is too long (max 50 characters)"})
     validateAsync(rootPath.username, {
         params: (ctx) => {
             const username = ctx.value();
@@ -92,6 +94,7 @@ export const registerFormSchema = schema<RegisterFormModel>((rootPath) => {
 
 
     required(rootPath.password);
+    maxLength(rootPath.password, 100, {message: "This password is too long (max 100 characters)"})
     validate(rootPath.confirmPassword, (ctx) => {
         const password = ctx.valueOf(rootPath.password);
         const confirmPassword = ctx.value();
