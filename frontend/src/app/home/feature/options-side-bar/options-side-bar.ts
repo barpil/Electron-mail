@@ -4,6 +4,7 @@ import {MatIcon} from "@angular/material/icon";
 import {MatDivider, MatListItem, MatListItemIcon, MatListItemTitle, MatNavList} from "@angular/material/list";
 import {RouterLink, RouterLinkActive} from "@angular/router";
 import {MatButton} from "@angular/material/button";
+import {UserBar} from "./user-bar/user-bar";
 
 @Component({
     selector: 'app-options-side-bar',
@@ -19,7 +20,8 @@ import {MatButton} from "@angular/material/button";
         MatListItemTitle,
         MatListItemIcon,
         RouterLinkActive,
-        MatButton
+        MatButton,
+        UserBar
     ],
     templateUrl: './options-side-bar.html',
     styleUrls: ['./options-side-bar.css', '../../../shared/styles/general.css'],

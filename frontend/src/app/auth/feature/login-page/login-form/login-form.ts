@@ -1,7 +1,7 @@
 import {Component, inject, signal} from '@angular/core';
 import {MatError, MatFormField, MatInput, MatLabel} from "@angular/material/input";
 import {MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle} from "@angular/material/card";
-import {customError, email, Field, form, required, schema, submit} from "@angular/forms/signals";
+import {customError, email, Field, form, maxLength, required, schema, submit} from "@angular/forms/signals";
 import {MatButton} from "@angular/material/button";
 import {InvalidCredentialsError, LoginService} from "../../../data-access/login.service";
 import {firstValueFrom} from "rxjs";
@@ -77,5 +77,8 @@ export interface LoginFormModel{
 export const loginFormSchema = schema<LoginFormModel>((rootPath) => {
     required(rootPath.email);
     email(rootPath.email);
+    maxLength(rootPath.email, 50, {message: "Email is too long (max 50 characters)"})
+
     required(rootPath.password);
+    maxLength(rootPath.password, 100, {message: "Password is too long (max 100 characters)"})
 })

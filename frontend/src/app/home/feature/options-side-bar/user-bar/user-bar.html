@@ -1,0 +1,12 @@
+<div class="user-profile-bar">
+    <div class="user-info">
+        <div class="avatar-circle">
+            <mat-icon>person</mat-icon>
+        </div>
+        <span class="username">{{ userService.getUserInfo().username }}</span>
+    </div>
+
+    <button mat-icon-button (click)="logoutUser()" type="button" class="logout-btn">
+        <mat-icon>logout</mat-icon>
+    </button>
+</div>

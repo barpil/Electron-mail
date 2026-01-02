@@ -6,8 +6,8 @@
         <mat-card-content class="card-content">
             <div class="input-fields">
                 <mat-form-field [floatLabel]="'auto'">
-                    <mat-label>Username</mat-label>
-                    <input matInput placeholder="username"  [field]="loginForm.email"/>
+                    <mat-label>Email</mat-label>
+                    <input matInput placeholder="Email"  [field]="loginForm.email"/>
 
                     @if(loginForm.email().touched()){
                         <mat-error>
