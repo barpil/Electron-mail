@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@localhost:1521/FREEPDB1
+    username: ELECTRON_USER
+    password: password_do_zmiany #Pamietaj zeby go zmienic rowniez w pliku 01_init.sql
+    driver-class-name: oracle.jdbc.driver.OracleDriver
+
+
+

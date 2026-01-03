@@ -6,7 +6,7 @@ services:
     image: electronmaildb
     container_name: em_db
     volumes:
-      - em-db-data:/opt/oracle
+      - em-db-data:/opt/oracle/oradata
 
     environment:
       ORACLE_PWD: password #tymczasowe hasło
