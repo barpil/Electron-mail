@@ -1,45 +1,50 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {LoginFormModel} from "../feature/login-page/login-form/login-form";
-import {delay, of, switchMap, throwError} from "rxjs";
+import {catchError, throwError} from "rxjs";
+import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams} from "@angular/common/http";
 
 @Injectable({
-  providedIn: 'root',
+    providedIn: 'root',
 })
 export class LoginService {
-    //tymczasowy dummy service
+    private readonly http = inject(HttpClient);
 
-  login(loginFormModel: LoginFormModel){
-      //dummy login
-      let result = false;
-      if(loginFormModel.email === "admin@electron.pl" && loginFormModel.password === "password"){
-          result = true;
-      }
-      return of(result).pipe(
-          delay(2000),
-          switchMap(result => {
-              if(!result){
-                  return throwError(() => new InvalidCredentialsError())
-              }
-              return of(undefined);
-          })
-      )
-      //Bedzie też będzie pamiętać żeby rozważyć przypadek, w którym odpowiedz z serwera jest nieprzewidziana
-      //np. inna niz domyslnie dla odrzuconych credentiali i tez to rozwiazac.
-  }
+    login(loginFormModel: LoginFormModel) {
+        const body = new HttpParams()
+            .set('email', loginFormModel.email)
+            .set('password', loginFormModel.password);
+
+        const headers = new HttpHeaders({
+            'Content-Type': 'application/x-www-form-urlencoded'
+        });
+
+        return this.http.post("/auth/login", body.toString(), {
+            headers: headers,
+            withCredentials: true
+        }).pipe(
+            catchError((error: HttpErrorResponse) => {
+                if (error.status === 401) {
+                    return throwError(() => new InvalidCredentialsError());
+                } else {
+                    return throwError(() => new Error("Unexpected error"));
+                }
+            })
+        );
+    }
 }
 
-export interface LoginRequest{
+export interface LoginRequest {
     email: string;
     //Potem trzeba bedzie zrobic zeby szyfrowac to haslo przed przeslaniem
     password: string;
 }
 
-export interface LoginResponse{
+export interface LoginResponse {
     token: string;
-    user: {id: string, email: string}
+    user: { id: string, email: string }
 }
 
-export class InvalidCredentialsError extends Error{
+export class InvalidCredentialsError extends Error {
     constructor() {
         super("Passed credentails were incorrect");
     }

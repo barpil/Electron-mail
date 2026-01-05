@@ -1,7 +1,6 @@
 package com.actdet.backend.services.data.entities;
 
 import lombok.Data;
-import lombok.Getter;
 
 @Data
 public class User {

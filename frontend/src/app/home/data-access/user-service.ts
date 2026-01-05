@@ -1,14 +1,27 @@
-import { Injectable } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
+import {HttpClient} from "@angular/common/http";
+import {map, shareReplay} from "rxjs";
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
 
-    getUserInfo(): UserInfo{
-        return {username: "John Doe"};
+    private readonly http = inject(HttpClient);
+
+    getUserInfo(){
+        return this.http.get<GetUserInfoResponse>("/user", {withCredentials: true}).pipe(
+            map(response => {
+                return {username: response.username}
+            }),
+            shareReplay(1)
+        )
     }
 
+}
+
+export interface GetUserInfoResponse{
+    username: string;
 }
 
 export interface UserInfo{

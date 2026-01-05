@@ -2,7 +2,6 @@ package com.actdet.backend.services.security;
 
 import com.actdet.backend.services.data.UserService;
 import com.actdet.backend.services.data.entities.User;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

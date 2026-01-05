@@ -1,5 +1,5 @@
 import {Component, signal} from '@angular/core';
-import {MatSidenav, MatSidenavContainer, MatSidenavContent} from "@angular/material/sidenav";
+import {MatSidenav, MatSidenavContainer} from "@angular/material/sidenav";
 import {MatIcon} from "@angular/material/icon";
 import {MatDivider, MatListItem, MatListItemIcon, MatListItemTitle, MatNavList} from "@angular/material/list";
 import {RouterLink, RouterLinkActive} from "@angular/router";
@@ -16,7 +16,6 @@ import {UserBar} from "./user-bar/user-bar";
         RouterLink,
         MatListItem,
         MatDivider,
-        MatSidenavContent,
         MatListItemTitle,
         MatListItemIcon,
         RouterLinkActive,

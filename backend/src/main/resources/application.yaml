@@ -4,6 +4,10 @@ spring:
     username: ELECTRON_USER
     password: password_do_zmiany #Pamietaj zeby go zmienic rowniez w pliku 01_init.sql
     driver-class-name: oracle.jdbc.driver.OracleDriver
+  session:
+    jdbc:
+      initialize-schema: never
 
+server.servlet.session.cookie.name: SESSION
 
 

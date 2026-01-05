@@ -3,7 +3,8 @@
         <div class="avatar-circle">
             <mat-icon>person</mat-icon>
         </div>
-        <span class="username">{{ userService.getUserInfo().username }}</span>
+        @let user = userInfo$ | async;
+        <span class="username">{{ user?.username }}</span>
     </div>
 
     <button mat-icon-button (click)="logoutUser()" type="button" class="logout-btn">
