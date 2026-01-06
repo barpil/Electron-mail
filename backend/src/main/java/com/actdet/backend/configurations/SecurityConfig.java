@@ -5,10 +5,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
@@ -26,9 +31,9 @@ public class SecurityConfig {
     */
     private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
 
-
     @Autowired
-    public SecurityConfig(FindByIndexNameSessionRepository<? extends Session> sessionRepository) {
+    public SecurityConfig(FindByIndexNameSessionRepository<? extends Session> sessionRepository,
+                          UserDetailsService userDetailsService) {
         this.sessionRepository = sessionRepository;
     }
 
@@ -39,11 +44,19 @@ public class SecurityConfig {
 
 
     @Bean
+    public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder){
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
+        return authenticationProvider;
+    }
+
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, SpringSessionBackedSessionRegistry<? extends Session> sessionRegistry) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/register").permitAll()
+                        .requestMatchers("/auth/login", "/auth/register", "/auth/logout").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -54,11 +67,9 @@ public class SecurityConfig {
                         // ZWRACAMY JSON zamiast Redirecta 302
                         .successHandler((request, response, authentication) -> {
                             response.setStatus(HttpServletResponse.SC_OK);
-                            response.getWriter().write("{\"status\": \"success\"}");
                         })
                         .failureHandler((request, response, exception) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.getWriter().write("{\"status\": \"error\", \"message\": \"Invalid credentials\"}");
                         })
                 )
                 .sessionManagement(session -> session
@@ -71,7 +82,11 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout")
                         .deleteCookies("SESSION")
-                        .invalidateHttpSession(true));
+                        .invalidateHttpSession(true)
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                        })
+                );
 
         return http.build();
     }
@@ -81,6 +96,8 @@ public class SecurityConfig {
     public SpringSessionBackedSessionRegistry<? extends Session> sessionRegistry() {
         return new SpringSessionBackedSessionRegistry<>(this.sessionRepository);
     }
+
+
 
 }
 

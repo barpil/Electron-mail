@@ -1,4 +1,4 @@
-package com.actdet.backend.web.rest.bodies;
+package com.actdet.backend.web.rest.bodies.responses;
 
 import lombok.Builder;
 import lombok.Data;

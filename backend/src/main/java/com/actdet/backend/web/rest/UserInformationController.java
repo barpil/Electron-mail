@@ -1,7 +1,7 @@
 package com.actdet.backend.web.rest;
 
 import com.actdet.backend.services.data.UserService;
-import com.actdet.backend.web.rest.bodies.GetUserInfoResponse;
+import com.actdet.backend.web.rest.bodies.responses.GetUserInfoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +24,7 @@ public class UserInformationController {
 
     @GetMapping
     public ResponseEntity<?> getCurrentUserUsername(Principal principal){
-        var opt = userService.findUserByEmail(principal.getName());
+        var opt = userService.getUserInfoByEmail(principal.getName());
         return opt.isPresent() ? ResponseEntity.ok(GetUserInfoResponse.builder().username(opt.get().getUsername()).build())
                 : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }

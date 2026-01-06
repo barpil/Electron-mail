@@ -31,6 +31,14 @@ export class LoginService {
             })
         );
     }
+
+    logout() {
+        return this.http.post("/auth/logout", {}, {withCredentials: true}).pipe(
+            catchError(error => {
+                return throwError(() => new Error("Unexpected error"));
+            })
+        );
+    }
 }
 
 export interface LoginRequest {

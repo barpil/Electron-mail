@@ -1,7 +1,7 @@
 package com.actdet.backend.services.security;
 
 import com.actdet.backend.services.data.UserService;
-import com.actdet.backend.services.data.entities.User;
+import com.actdet.backend.services.data.repositories.entities.UserCredentials;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,12 +21,12 @@ public class AuthService implements UserDetailsService {
 
     @Override
     @NullMarked
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        User user = this.userService.findUserByEmail(username).orElseThrow(() -> new UsernameNotFoundException(""));
+        UserCredentials userCredentials = this.userService.getUserCredentialsByEmail(email).orElseThrow(() -> new UsernameNotFoundException(""));
         return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password("{noop}"+user.getPassword()) //{noop} sprawia ze nie trzeba szyfrowac hasla (tymczasowo do testow)
+                .username(userCredentials.getEmail())
+                .password(userCredentials.getHashedPassword())
                 .roles("USER")
                 .build();
 
