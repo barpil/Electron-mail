@@ -1,5 +1,8 @@
 import {
-    customError, email, maxLength,
+    customError,
+    debounce,
+    email,
+    maxLength,
     minLength,
     required,
     schema,
@@ -27,9 +30,11 @@ export const registerFormSchema = schema<RegisterFormModel>((rootPath) => {
     maxLength(rootPath.email, 50, {message: "This email is too long (max 50 characters)"})
     email(rootPath.email, {message: "Please enter a valid email"})
 
+    debounce(rootPath.email, 500);
     validateAsync(rootPath.email, {
         //Przetworzenie sprawdzajace czy w ogole oplaca sie wykonywac operacje async (undefined oznacza ze nie)
         params: (ctx) => {
+
             const email = ctx.value();
             if (!email || email.length < 8) return undefined;
             return email;
@@ -62,6 +67,7 @@ export const registerFormSchema = schema<RegisterFormModel>((rootPath) => {
     required(rootPath.username, {message: "Username is required"});
     minLength(rootPath.username, 8, {message: "Username must be at least 8 characters long"});
     maxLength(rootPath.username, 50, {message: "This username is too long (max 50 characters)"})
+    debounce(rootPath.username, 500)
     validateAsync(rootPath.username, {
         params: (ctx) => {
             const username = ctx.value();
@@ -77,7 +83,7 @@ export const registerFormSchema = schema<RegisterFormModel>((rootPath) => {
         onSuccess: (result: boolean) => {
             if (!result) {
                 return customError({
-                    message: "Username is already occupied. Please choose a different one.",
+                    message: "Specified username is already in use",
                     kind: 'invalid-username'
                 })
             }

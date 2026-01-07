@@ -1,7 +1,7 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, effect, inject, resource, Signal, signal} from '@angular/core';
 import {Router} from "@angular/router";
-import {customError, Field, form, submit} from "@angular/forms/signals";
-import {firstValueFrom} from "rxjs";
+import {customError, Field, form, schema, submit, validateAsync} from "@angular/forms/signals";
+import {debounceTime, distinctUntilChanged, firstValueFrom} from "rxjs";
 import {MatButton} from "@angular/material/button";
 import {MatCard, MatCardActions, MatCardContent, MatCardHeader, MatCardTitle} from "@angular/material/card";
 import {MatError, MatFormField, MatInput, MatLabel} from "@angular/material/input";
@@ -9,9 +9,11 @@ import {MatProgressSpinner} from "@angular/material/progress-spinner";
 import {RegisterService} from "../../../data-access/register.service";
 import {RegisterFormModel, registerFormSchema} from "./register-form.schema";
 import {PasswordStrengthChecker} from "../../../ui/password-strength-checker/password-strength-checker";
+import {debouncedSignal} from "../../../utils/debouncedSignal";
+import {toObservable, toSignal} from "@angular/core/rxjs-interop";
 
 @Component({
-  selector: 'app-register-form',
+    selector: 'app-register-form',
     imports: [
         MatButton,
         MatCard,
@@ -27,8 +29,9 @@ import {PasswordStrengthChecker} from "../../../ui/password-strength-checker/pas
         Field,
         PasswordStrengthChecker
     ],
-  templateUrl: './register-form.html',
-  styleUrl: './register-form.css',
+    templateUrl: './register-form.html',
+    styleUrl: './register-form.css',
+    standalone: true
 })
 export class RegisterForm {
     private readonly registerService = inject(RegisterService);
@@ -41,8 +44,10 @@ export class RegisterForm {
         password: '',
         confirmPassword: ''
     });
+    protected readonly registerForm = form<RegisterFormModel>(this.formModel, registerFormSchema);
 
-    registerForm = form<RegisterFormModel>(this.formModel, registerFormSchema);
+
+
 
     protected submitRegisterForm() {
         this.isLoading = true;
@@ -67,6 +72,7 @@ export class RegisterForm {
 
     protected readonly customError = customError;
 }
+
 
 
 

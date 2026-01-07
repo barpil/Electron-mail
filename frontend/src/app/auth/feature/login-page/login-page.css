@@ -4,9 +4,10 @@
 
     display: grid;
     grid-template-columns: 15vw 70vw 15vw;
-    grid-template-rows: 20vh 60vh 20vh;
+    grid-template-rows: 30vh 30vh 10vh 30vh;
     justify-items: center;
     align-items: center;
 }
 
 .login-form { grid-area: 2 / 2 / 3 / 3; }
+.bottom-text { grid-area: 3 / 2 / 4 / 3; }

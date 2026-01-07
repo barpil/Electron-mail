@@ -1,8 +1,9 @@
 import {inject, Injectable} from '@angular/core';
-import {catchError, debounceTime, delay, of, switchMap, throwError} from "rxjs";
+import {catchError, debounceTime, delay, map, of, switchMap, throwError} from "rxjs";
 import {RegisterFormModel} from "../feature/register-page/register-form/register-form.schema";
 import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams} from "@angular/common/http";
 import {InvalidCredentialsError} from "./login.service";
+import {email} from "@angular/forms/signals";
 
 
 @Injectable({
@@ -14,22 +15,38 @@ export class RegisterService {
 
 
     checkIfEmailIsAvailable(email: string) {
-        return of(email).pipe(
-            debounceTime(500),
-            switchMap(email => {
-                return of(email !== "admin@electron.pl");
-            }),
-            delay(1000)
+        const body = new HttpParams()
+            .set("value", email);
+
+        const headers = new HttpHeaders({
+            'Content-Type': 'application/x-www-form-urlencoded'
+        });
+
+        return this.http.post("/auth/availability/email", body.toString(), {
+            headers: headers
+        }).pipe(
+            map(() => true),
+            catchError(() => {
+                return of(false);
+            })
         )
     }
 
     checkIfUsernameIsAvailable(username: string) {
-        return of(username).pipe(
-            debounceTime(500),
-            switchMap(username => {
-                return of(username !== "admin-electrona");
-            }),
-            delay(1000)
+        const body = new HttpParams()
+            .set("value", username);
+
+        const headers = new HttpHeaders({
+            'Content-Type': 'application/x-www-form-urlencoded'
+        });
+
+        return this.http.post("/auth/availability/username", body.toString(), {
+            headers: headers
+        }).pipe(
+            map(() => true),
+            catchError(() => {
+                return of(false);
+            })
         )
     }
 

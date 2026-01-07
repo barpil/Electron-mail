@@ -11,11 +11,11 @@ export class LoginService {
 
     login(loginFormModel: LoginFormModel) {
         const body = new HttpParams()
-            .set('email', loginFormModel.email)
-            .set('password', loginFormModel.password);
+            .set("email", loginFormModel.email)
+            .set("password", loginFormModel.password);
 
         const headers = new HttpHeaders({
-            'Content-Type': 'application/x-www-form-urlencoded'
+            "Content-Type": "application/x-www-form-urlencoded"
         });
 
         return this.http.post("/auth/login", body.toString(), {
@@ -43,7 +43,6 @@ export class LoginService {
 
 export interface LoginRequest {
     email: string;
-    //Potem trzeba bedzie zrobic zeby szyfrowac to haslo przed przeslaniem
     password: string;
 }
 

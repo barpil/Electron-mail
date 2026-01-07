@@ -36,13 +36,20 @@ public class UserService {
         return usersRepository.findUsersByEmail(email);
     }
 
+    public boolean isUsernameAvailable(String username){
+        if(username==null) return false; //Username nie moze byc pusty
+        return !usersRepository.existsByUsername(username);
+    }
+
+    public boolean isEmailAvailable(String email){
+        if(email==null) return false; //Email nie moze byc pusty
+        return !usersRepository.existsByEmail(email);
+    }
+
+
     /*
     DO DODANIA KONTROLA DOSTEPNOSCI NAZW UZYTKOWNIKA I EMAILI Z DODATKOWYM POTIWERDZANIEM ICH PRZY REJESTRACJI
     WE FRONTENDZIE
-
-    ORAZ BLOKADA STRON FRONTENDU PRZY NIEAKTUALNEJ SESJI
-
-
      */
     public UserCredentials registerUser(String email, String username, String password) throws DataAccessException {
         String hashedPassword = passwordEncoder.encode(password);

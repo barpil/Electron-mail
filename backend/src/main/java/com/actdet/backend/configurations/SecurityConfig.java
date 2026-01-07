@@ -55,8 +55,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http, SpringSessionBackedSessionRegistry<? extends Session> sessionRegistry) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .requestCache(cache -> cache.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/register", "/auth/logout").permitAll()
+                        .requestMatchers("/auth/login", "/auth/register", "/auth/logout",
+                                "/auth/availability/*").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -64,11 +66,15 @@ public class SecurityConfig {
                         .usernameParameter("email")
                         .passwordParameter("password")
 
-                        // ZWRACAMY JSON zamiast Redirecta 302
                         .successHandler((request, response, authentication) -> {
                             response.setStatus(HttpServletResponse.SC_OK);
                         })
                         .failureHandler((request, response, exception) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        })
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         })
                 )

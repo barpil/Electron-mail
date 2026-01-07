@@ -3,12 +3,13 @@ import {ValidationError} from "@angular/forms/signals";
 import {MatIcon} from "@angular/material/icon";
 
 @Component({
-  selector: 'app-password-strength-checker',
+    selector: 'app-password-strength-checker',
     imports: [
         MatIcon
     ],
-  templateUrl: './password-strength-checker.html',
-  styleUrl: './password-strength-checker.css',
+    templateUrl: './password-strength-checker.html',
+    styleUrl: './password-strength-checker.css',
+    standalone: true
 })
 export class PasswordStrengthChecker {
     currentErrors = input.required<ValidationError.WithField[]>();
