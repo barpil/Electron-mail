@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@localhost:1521/FREEPDB1
+    username: ELECTRON_USER
+    password: password_do_zmiany
+
+

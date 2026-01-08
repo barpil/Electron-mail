@@ -1,7 +1,6 @@
 import {Component, inject} from '@angular/core';
 import {MatIcon} from "@angular/material/icon";
-import {MatButton, MatIconButton} from "@angular/material/button";
-import {LogoutService} from "../../../data-access/logout-service";
+import {MatIconButton} from "@angular/material/button";
 import {UserService} from "../../../data-access/user-service";
 import {AsyncPipe} from "@angular/common";
 import {LoginService} from "../../../../auth/data-access/login.service";
@@ -13,7 +12,6 @@ import {Router} from "@angular/router";
   selector: 'app-user-bar',
     imports: [
         MatIcon,
-        MatButton,
         MatIconButton,
         AsyncPipe
     ],

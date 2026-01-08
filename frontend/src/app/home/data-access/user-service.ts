@@ -10,7 +10,7 @@ export class UserService {
     private readonly http = inject(HttpClient);
 
     getUserInfo(){
-        return this.http.get<GetUserInfoResponse>("/user", {withCredentials: true}).pipe(
+        return this.http.get<GetUserInfoResponse>("/api/user", {withCredentials: true}).pipe(
             map(response => {
                 return {username: response.username}
             }),

@@ -18,7 +18,7 @@ export class LoginService {
             "Content-Type": "application/x-www-form-urlencoded"
         });
 
-        return this.http.post("/auth/login", body.toString(), {
+        return this.http.post("/api/auth/login", body.toString(), {
             headers: headers,
             withCredentials: true
         }).pipe(
@@ -33,7 +33,7 @@ export class LoginService {
     }
 
     logout() {
-        return this.http.post("/auth/logout", {}, {withCredentials: true}).pipe(
+        return this.http.post("/api/auth/logout", {}, {withCredentials: true}).pipe(
             catchError(error => {
                 return throwError(() => new Error("Unexpected error"));
             })

@@ -12,12 +12,16 @@ RUN npm run build
 
 FROM nginxinc/nginx-unprivileged:${NGINX_VERSION} AS runner
 
-USER nginx
+USER root
 
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY nginx/ssl /etc/nginx/ssl
 COPY --chown=nginx:nginx --from=builder /frontend/dist/*/browser /usr/share/nginx/html
+COPY scripts/entrypoint.sh /entrypoint.sh
 
-EXPOSE 8080
+RUN chmod +x /entrypoint.sh
 
-ENTRYPOINT ["nginx", "-c", "/etc/nginx/nginx.conf"]
-CMD ["-g", "daemon off;"]
+EXPOSE 8433
+
+USER nginx
+ENTRYPOINT ["/entrypoint.sh"]

@@ -22,7 +22,7 @@ export class RegisterService {
             'Content-Type': 'application/x-www-form-urlencoded'
         });
 
-        return this.http.post("/auth/availability/email", body.toString(), {
+        return this.http.post("/api/auth/availability/email", body.toString(), {
             headers: headers
         }).pipe(
             map(() => true),
@@ -40,7 +40,7 @@ export class RegisterService {
             'Content-Type': 'application/x-www-form-urlencoded'
         });
 
-        return this.http.post("/auth/availability/username", body.toString(), {
+        return this.http.post("/api/auth/availability/username", body.toString(), {
             headers: headers
         }).pipe(
             map(() => true),
@@ -60,7 +60,7 @@ export class RegisterService {
             'Content-Type': 'application/x-www-form-urlencoded'
         });
 
-        return this.http.post("/auth/register", body.toString(), {
+        return this.http.post("/api/auth/register", body.toString(), {
             headers: headers,
             withCredentials: false
         }).pipe(
