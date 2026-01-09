@@ -11,6 +11,7 @@ import org.hibernate.annotations.Generated;
 public class UserCredentials {
 
     @Id
+    @Generated
     @Column(name = "USER_ID")
     private String userId;
 
