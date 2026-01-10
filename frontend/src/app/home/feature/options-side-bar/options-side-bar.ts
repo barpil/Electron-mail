@@ -8,6 +8,7 @@ import {UserBar} from "./user-bar/user-bar";
 import {LoginService} from "../../../auth/data-access/login.service";
 import {firstValueFrom} from "rxjs";
 import {customError} from "@angular/forms/signals";
+import {MessageService} from "../../data-access/message-service";
 
 @Component({
     selector: 'app-options-side-bar',
@@ -29,14 +30,24 @@ import {customError} from "@angular/forms/signals";
     styleUrls: ['./options-side-bar.css', '../../../shared/styles/general.css'],
 })
 export class OptionsSideBar {
-
+    private readonly messageService = inject(MessageService);
 
     readonly folders = signal<NavItem[]>([
-        {label: 'Received', icon: 'inbox', route: '/inbox', queryParams: {}},
-        {label: 'Sent', icon: 'send', route: '/inbox', queryParams: {type: 'sent'}},
+        {label: 'Received', icon: 'inbox', route: '/inbox', queryParams: {}, action: () => this.refreshReceivedMessages()},
+        {label: 'Sent', icon: 'send', route: '/inbox', queryParams: {type: 'sent'}, action: () => this.refreshSentMessages()},
     ]);
 
     readonly newMessageLink = {route: '/inbox/new-message'}
+
+    protected refreshReceivedMessages(){
+        this.messageService.getMessages(true).subscribe();
+        this.messageService.refresh();
+    }
+
+    protected refreshSentMessages(){
+        this.messageService.getSentMessages(true).subscribe();
+        this.messageService.refresh();
+    }
 
 }
 
@@ -45,4 +56,5 @@ interface NavItem {
     icon: string;
     route: string;
     queryParams: any;
+    action?: () => void
 }

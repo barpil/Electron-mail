@@ -1,12 +1,10 @@
-import { Component } from '@angular/core';
-import {MessageList} from "./message-list/message-list";
+import {Component} from '@angular/core';
 import {OptionsSideBar} from "../options-side-bar/options-side-bar";
 import {RouterOutlet} from "@angular/router";
 
 @Component({
   selector: 'app-home-default',
     imports: [
-        MessageList,
         OptionsSideBar,
         RouterOutlet
     ],

@@ -17,7 +17,7 @@
                             <span class="sender-name">{{ msg.sender }}</span>
                         </div>
 
-                        <span class="date-label">{{ msg.date | date:'medium' }}</span>
+                        <span class="date-label">{{ msg.date | date: 'dd.MM.yyyy, HH:mm' }}</span>
                     </div>
                 </div>
             </div>
@@ -25,11 +25,29 @@
             <mat-divider></mat-divider>
 
             <article class="message-content">
-                {{ msg.content }}
+                {{ msg.text }}
             </article>
 
             <footer class="message-footer">
-                <span>TU BEDA ZALACZNIKI</span>
+                @if (msg.attachments && msg.attachments.length > 0) {
+                    <div class="attachment-display-section">
+            <span class="attachment-label">
+                <mat-icon inline>attach_file</mat-icon>
+                Attachments ({{ msg.attachments.length }})
+            </span>
+
+                        <mat-chip-set class="attachment-chips">
+                            @for (file of msg.attachments; track file.name) {
+                                <mat-chip (click)="downloadAttachment(file)" class="downloadable-chip icon-text-in-line">
+                                    <mat-icon matChipAvatar>insert_drive_file</mat-icon>
+                                    <span class="file-name">{{ file.name }}</span>
+                                    <span class="file-size">({{ formatFileSize(file.size) }})</span>
+                                    <mat-icon class="download-icon">download</mat-icon>
+                                </mat-chip>
+                            }
+                        </mat-chip-set>
+                    </div>
+                }
             </footer>
         </div>
     }

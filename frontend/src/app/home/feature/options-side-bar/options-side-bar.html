@@ -21,6 +21,7 @@
                    [queryParams]="folder.queryParams"
                    routerLinkActive="active-link"
                    class="icon-text-in-line"
+                   (click)="folder.action?.()"
                 >
                     <mat-icon matListItemIcon>{{ folder.icon }}</mat-icon>
                     <span matListItemTitle>{{ folder.label }}</span>

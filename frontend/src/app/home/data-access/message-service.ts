@@ -1,163 +1,135 @@
-import {Injectable} from '@angular/core';
-import {debounce, delay, interval, of} from "rxjs";
+import {inject, Injectable} from '@angular/core';
+import {BehaviorSubject, catchError, forkJoin, map, Observable, shareReplay, switchMap, tap, throwError} from "rxjs";
 import {NewMessageFormModel} from "../feature/home-default/new-message-form/new-message-form";
+import {EncodedMessageDto} from "./dto/encoded-message-dto";
+import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
+import {decode, encode} from "@msgpack/msgpack";
+import {MessageDto} from "./dto/message-dto";
+import {EncryptionService} from "../util/encryption-service";
+import {MessagePayloadDto} from "../util/dto/message-payload-dto";
+import {AttachmentsDto} from "./dto/attachments-dto";
+
 
 @Injectable({
     providedIn: 'root',
 })
 export class MessageService {
-    getMessages() {
-        //dummy response
-        const response: GetMessagesResponse = {
-            messages:
-                [
-                    {
-                        id: 1,
-                        sender: 'Zespół Angular',
-                        subject: 'Nowości w wersji 20',
-                        date: new Date(),
-                        isRead: false
-                    },
-                    {
-                        id: 2,
-                        sender: 'Jan Kowalski',
-                        subject: 'Faktura za usługi',
-                        date: new Date('2025-12-20'),
-                        isRead: false
-                    }]
+
+    private readonly http = inject(HttpClient);
+    private readonly encryptionService = inject(EncryptionService);
+
+    private readonly refreshTrigger$ = new BehaviorSubject<void>(undefined);
+
+    private messagesCache$?: Observable<MessageDto[]>;
+    private sentMessagesCache$?: Observable<MessageDto[]>;
+
+    refresh(){this.refreshTrigger$.next();}
+    get refresh$(){return this.refreshTrigger$.asObservable()}
+
+
+    getMessages(forceRefresh = false): Observable<MessageDto[]> {
+        if (forceRefresh || !this.messagesCache$) {
+            this.messagesCache$ = this.http.get("/api/messages/received", {
+                responseType: "arraybuffer",
+                withCredentials: true
+            }).pipe(
+                switchMap(response => this.mapGetMessagesResponseToMessageDtos(response)),
+                shareReplay(1),
+            );
         }
+        return this.messagesCache$;
+    }
 
-        //Trzeba pamietac ze to co tu dostaniemy powinno byc zaszyfrowane i tutaj dopiero odszyfrowane
-        const result = response.messages;
+    getSentMessages(forceRefresh = false) {
+        if (forceRefresh || !this.sentMessagesCache$) {
+            this.sentMessagesCache$ = this.http.get("/api/messages/sent", {
+                responseType: "arraybuffer",
+                withCredentials: true
+            }).pipe(
+                switchMap(response => this.mapGetMessagesResponseToMessageDtos(response)),
+                shareReplay(1),
+            );
+        }
+        return this.sentMessagesCache$;
+    }
 
-        return of(result).pipe(
-            delay(2000),
+    private async mapGetMessagesResponseToMessageDtos(response: ArrayBuffer): Promise<MessageDto[]> {
+        const decodedResponse = decode(new Uint8Array(response)) as GetMessagesResponse;
+        const decryptionPromises = decodedResponse.messages.map(msg =>
+            this.encryptionService.decryptMessage(msg)
+        );
+        return await Promise.all(decryptionPromises);
+    }
+
+    getMessage(messageId: number): Observable<MessageDto> {
+        return forkJoin([this.getMessages(), this.getSentMessages()]).pipe(
+            map(([received, sent]) => {
+                const message = received.find(m => m.id === Number(messageId)) ??
+                    sent.find(m => m.id === Number(messageId))
+                if(!message){throw new MessageNotFoundError("Message not found");}
+                return message
+            })
         )
     }
 
-    getSentMessages() {
-        //dummy response
-        const response: GetMessagesResponse = {
-            messages:
-                [
-                    {
-                        id: 3,
-                        sender: 'You',
-                        subject: 'Droga Aniu',
-                        date: new Date(),
-                        isRead: true
-                    },
-                    {
-                        id: 4,
-                        sender: 'You',
-                        subject: 'Droga Aniu znowu',
-                        date: new Date('2025-12-20'),
-                        isRead: true
-                    }]
+    async sendMessage(messageForm: NewMessageFormModel) {
+        const attachments: AttachmentsDto[] = await Promise.all(
+            messageForm.attachments.map(async (file): Promise<AttachmentsDto> => {
+                const buffer = await file.arrayBuffer();
+                return {
+                    name: file.name,
+                    data: new Uint8Array(buffer),
+                    size: file.size
+                }
+            })
+        );
+        const messagePayload: MessagePayloadDto = {
+            subject: messageForm.subject,
+            text: messageForm.content,
+            attachments: attachments
+        };
+
+        const encryptionResult = await this.encryptionService
+            .encryptMessagePayload(messagePayload);
+
+
+        const requestBody: SendMessageRequest = {
+            receiverEmail: messageForm.recipient,
+            encryptedMessage: new Uint8Array(encryptionResult.encryptedPayload),
+            key: new Uint8Array(encryptionResult.key),
+            iv: new Uint8Array(encryptionResult.iv)
         }
 
-        //Trzeba pamietac ze to co tu dostaniemy powinno byc zaszyfrowane i tutaj dopiero odszyfrowane
-        const result = response.messages;
-
-        return of(result).pipe(
-            delay(2000),
-        )
+        const msgPackBody: Uint8Array = encode(requestBody);
+        const binaryBlob = new Blob([msgPackBody.buffer as ArrayBuffer], {type: "application/x-msgpack"})
+        return this.http.post("/api/messages/send", binaryBlob, {
+            withCredentials: true,
+            headers: new HttpHeaders({
+                "Content-Type": "application/x-msgpack"
+            })
+        }).pipe(
+            catchError((error: HttpErrorResponse) => {
+                return throwError(() => new Error("Message sending error"));
+            })
+        ).subscribe();
     }
 
-    getMessageDetails(messageId: string) {
-        //dummy response
-        let result: MessageDetails;
-        switch (messageId) {
-            case "1":
-                result = {
-                    id: 1,
-                    sender: 'Zespół Angular',
-                    subject: 'Nowości w wersji 20',
-                    date: new Date(),
-                    content: 'ZOBACZ JAKIE SUPER RZECZY DLA CIEBIE PRZYGOTOWALISMY',
-                    isRead: false
-                }
-                break;
-            case "2":
-                result = {
-                    id: 2,
-                    sender: 'Jan Kowalski',
-                    subject: 'Faktura za usługi',
-                    date: new Date('2025-12-20'),
-                    content: 'Prosze o przeslanie tych pieniedzy na moj adres mailowy',
-                    isRead: true
-                }
-                break;
-            case "3":
-                result = {
-                    id: 1,
-                    sender: 'You',
-                    subject: 'Droga Aniu',
-                    date: new Date(),
-                    content: 'Hejka co tam u Ciebie?',
-                    isRead: true
-                }
-                break;
-            case "4":
-                result = {
-                    id: 2,
-                    sender: 'You',
-                    subject: 'Droga Aniu znowu',
-                    date: new Date('2025-12-20'),
-                    content: 'HALO ODPISZ PROSZE',
-                    isRead: true
-                }
-                break;
-            default:
-                throw new MessageNotFoundError("Message not found");
-        }
-        return of(result);
-    }
+}
 
-    sendMessage(messageForm: NewMessageFormModel) {
-        console.log(`Message sent:
-        ${messageForm.recipient}
-        ${messageForm.subject}
-        ${messageForm.content}
-        ${messageForm.attachments}`)
-        return of(messageForm).pipe(
-            debounce(() => interval(500)),
-            delay(1000)
-        )
-    }
-
+export interface SendMessageRequest {
+    receiverEmail: string,
+    encryptedMessage: Uint8Array,
+    key: Uint8Array,
+    iv: Uint8Array
 }
 
 export class MessageNotFoundError extends Error {
 }
 
-
-export interface GetMessagesRequest {
-
-}
-
 export interface GetMessagesResponse {
-    messages: MessageListItem[];
+    messages: EncodedMessageDto[];
 }
 
-export interface MessageListItem {
-    id: number;
-    sender: string;
-    subject: string;
-    date: Date;
-    isRead: boolean;
-}
 
-export interface MessageDetails {
-    id: number;
-    sender: string;
-    subject: string;
-    date: Date;
-    content: string;
-    isRead: boolean;
-}
 
-export interface GetSentMessagesRequest {
-
-}
 

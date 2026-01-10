@@ -7,17 +7,19 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Generated;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(schema = "MESSAGES")
+@Table(name = "MESSAGES")
 @NoArgsConstructor
 public class Messages {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MESSAGE_ID")
+    @Getter
     private Long messageId;
 
     @ManyToOne
@@ -28,18 +30,37 @@ public class Messages {
     @JoinColumn(name = "RECEIVER_ID", referencedColumnName = "USER_ID", nullable = false)
     private Users receiver;
 
-    @Column(name = "MESSAGE_SUBJECT", length = 100, nullable = false)
-    private String subject;
-    @Column(name = "MESSAGE_TEXT", length = 2048)
-    private String text;
+    @Column(name = "SENT_DATE")
+    @Generated
+    @Getter
+    private LocalDateTime sentDate;
+
+    @Column(name = "ENCRYPTED_MESSAGE")
+    @Getter
+    private byte[] encryptedMessage;
+
+    @Column(name = "ENCRYPTION_KEY")
+    @Getter
+    private byte[] key;
+
+    @Column(name = "IV")
+    @Getter
+    private byte[] iv;
+
+    @Column(name = "MESSAGE_READ")
+    @Getter
+    @Setter
+    private boolean read;
 
     @Generated
     @Column(name = "DELETED_BY_SENDER", insertable = false)
     @Setter
+    @Getter
     private boolean isDeletedBySender;
     @Generated
     @Column(name = "DELETED_BY_RECEIVER", insertable = false)
     @Setter
+    @Getter
     private boolean isDeletedByReceiver;
 
     @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -48,13 +69,17 @@ public class Messages {
     private List<Attachments> attachments = new ArrayList<>();
 
     @Builder
-    public Messages(List<Attachments> attachments, Users sender, Users receiver, String subject, String text) {
+    public Messages(List<Attachments> attachments, Users sender, Users receiver, byte[] encryptedMessage, byte[] key, byte[] iv) {
         this.attachments = attachments;
         this.sender = sender;
         this.receiver = receiver;
-        this.subject = subject;
-        this.text = text;
+        this.encryptedMessage = encryptedMessage;
+        this.key = key;
+        this.iv = iv;
+        this.read = false;
     }
 
 
+    public String getReceiverEmail(){return this.receiver.getEmail();}
+    public String getSenderEmail(){return this.sender.getEmail();}
 }

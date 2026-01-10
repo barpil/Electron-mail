@@ -87,7 +87,7 @@ export class NewMessageForm {
         this.isLoading.set(true);
         submit(this.newMessageForm, async form => {
             try {
-                await firstValueFrom(this.messageService.sendMessage(form().value()))
+                await this.messageService.sendMessage(form().value())
                 if (!await this.router.navigate(['/inbox'])) {
                     throw new Error("Routing failed");
                 }
