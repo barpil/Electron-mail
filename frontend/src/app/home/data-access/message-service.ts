@@ -1,5 +1,16 @@
 import {inject, Injectable} from '@angular/core';
-import {BehaviorSubject, catchError, forkJoin, map, Observable, shareReplay, switchMap, tap, throwError} from "rxjs";
+import {
+    BehaviorSubject,
+    catchError,
+    firstValueFrom,
+    forkJoin,
+    map,
+    Observable,
+    shareReplay,
+    switchMap,
+    tap,
+    throwError
+} from "rxjs";
 import {NewMessageFormModel} from "../feature/home-default/new-message-form/new-message-form";
 import {EncodedMessageDto} from "./dto/encoded-message-dto";
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
@@ -8,6 +19,7 @@ import {MessageDto} from "./dto/message-dto";
 import {MessagePayloadDto} from "../util/dto/message-payload-dto";
 import {AttachmentsDto} from "./dto/attachments-dto";
 import {EncryptionService} from "../../shared/data-access/encryption-service";
+import {GetUserInfoResponse, UserService} from "./user-service";
 
 
 @Injectable({
@@ -17,6 +29,7 @@ export class MessageService {
 
     private readonly http = inject(HttpClient);
     private readonly encryptionService = inject(EncryptionService);
+    private readonly userService = inject(UserService);
 
     private readonly refreshTrigger$ = new BehaviorSubject<void>(undefined);
 
@@ -44,7 +57,7 @@ export class MessageService {
         return this.messagesCache$;
     }
 
-    getSentMessages(forceRefresh = false) {
+    getSentMessages(forceRefresh = false): Observable<MessageDto[]> {
         if (forceRefresh || !this.sentMessagesCache$) {
             this.sentMessagesCache$ = this.http.get("/api/messages/sent", {
                 responseType: "arraybuffer",
@@ -76,6 +89,14 @@ export class MessageService {
         )
     }
 
+    markMessageAsRead(messageId: number){
+        return this.http.get<GetUserInfoResponse>(`/api/messages/read/${messageId}`, {withCredentials: true}).pipe(
+            catchError(err => {
+                throw new Error("Message could not be mark as read.")
+            })
+        )
+    }
+
     async sendMessage(messageForm: NewMessageFormModel) {
         const attachments: AttachmentsDto[] = await Promise.all(
             messageForm.attachments.map(async (file): Promise<AttachmentsDto> => {
@@ -93,20 +114,18 @@ export class MessageService {
             attachments: attachments
         };
 
+        //Dodanie wysylajacego zeby mial mozliwosc podem w wyslanych wyswietlenia wiadomosci
+        const senderEmail = (await firstValueFrom(this.userService.getUserInfo())).email;
+
         const encryptionResult = await this.encryptionService
-            .encryptMessagePayload(messagePayload, messageForm.recipient);
-
-
+            .encryptMessagePayload(messagePayload, senderEmail, messageForm.recipients);
         const requestBody: SendMessageRequest = {
-            receiverEmail: messageForm.recipient,
+            messageKeysInfos: encryptionResult.messageKeysInfos,
             encryptedMessage: new Uint8Array(encryptionResult.encryptedPayload),
-            key: new Uint8Array(encryptionResult.key),
             iv: new Uint8Array(encryptionResult.iv)
         }
 
-        //Moze te 2 liniki ponizej zamienic na: const binaryBlob = new Blob([new Uint8Array(encode(requestBody))], {type: "application/x-msgpack"});
-        const msgPackBody: Uint8Array = encode(requestBody);
-        const binaryBlob = new Blob([msgPackBody.buffer as ArrayBuffer], {type: "application/x-msgpack"})
+        const binaryBlob = new Blob([new Uint8Array(encode(requestBody))], {type: "application/x-msgpack"});
         return this.http.post("/api/messages/send", binaryBlob, {
             withCredentials: true,
             headers: new HttpHeaders({
@@ -122,10 +141,16 @@ export class MessageService {
 }
 
 export interface SendMessageRequest {
-    receiverEmail: string,
+    messageKeysInfos: MessageKeyInfo[],
     encryptedMessage: Uint8Array,
-    key: Uint8Array,
     iv: Uint8Array
+}
+
+export interface MessageKeyInfo {
+    email: string,
+    isSender: boolean,
+    isReceiver: boolean,
+    key: Uint8Array
 }
 
 export class MessageNotFoundError extends Error {

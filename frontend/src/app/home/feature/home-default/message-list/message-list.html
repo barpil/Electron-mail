@@ -6,9 +6,9 @@
     <mat-nav-list class="message-list">
         @for (message of messages(); track message.id) {
             <a mat-list-item
-               [activated]="!message.isRead"
+               [class.unread-item]="!message.read"
                [routerLink]="['.', message.id]"
-               (click)="$event.preventDefault()"
+               (click)="onMessageRead($event, message)"
             >
             <span matListItemTitle class="message-header">
                 <span class="sender-name">{{ message.sender }}</span>

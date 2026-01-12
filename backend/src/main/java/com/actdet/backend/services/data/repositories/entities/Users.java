@@ -3,6 +3,7 @@ package com.actdet.backend.services.data.repositories.entities;
 
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Generated;
 
@@ -13,7 +14,8 @@ public class Users {
     @Id
     @Generated
     @Column(name = "USER_ID")
-    String userId;
+    @Getter
+    private String userId;
 
     @Column(name = "EMAIL", nullable = false, unique = true, length = 50)
     private String email;

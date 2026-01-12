@@ -3,9 +3,9 @@ import {AttachmentsDto} from "./attachments-dto";
 export interface MessageDto{
     id: number;
     sender: string;
-    receiver: string;
+    receivers: string[];
     date: Date;
-    isRead: boolean;
+    read: boolean;
 
     subject: string;
     text: string;

@@ -7,6 +7,7 @@ import {MessagePayloadDto} from "../../home/util/dto/message-payload-dto";
 import {EncodedMessageDto} from "../../home/data-access/dto/encoded-message-dto";
 import {MessageDto} from "../../home/data-access/dto/message-dto";
 import {KeyService} from "./key-service";
+import {MessageKeyInfo} from "../../home/data-access/message-service";
 
 @Injectable({
     providedIn: 'root',
@@ -23,14 +24,27 @@ export class EncryptionService {
         });
     }
 
-    public async encryptMessagePayload(message: MessagePayloadDto, receiverEmail: string) {
+    public async encryptMessagePayload(message: MessagePayloadDto, senderEmail: string, receiverEmails: string[]) {
         //Zakodowanie payloadu poprzez MsgPack
         const encodedPayload = encode(message);
 
         const encryptionResult = await this.encryptAES(encodedPayload);
+        const messageKeyInfos: MessageKeyInfo[] = [];
 
-        const encryptedAesKey = await this.keyService.wrapMessageAESKey(encryptionResult.aesKey, receiverEmail);
-        return {encryptedPayload: encryptionResult.encryptedData, key: encryptedAesKey, iv: encryptionResult.iv};
+        let isSenderAlsoAReceiver = false;
+        if(receiverEmails.includes(senderEmail)){
+            isSenderAlsoAReceiver = true;
+        }
+        messageKeyInfos.push({email: senderEmail, isSender: true, isReceiver: isSenderAlsoAReceiver,
+        key: new Uint8Array(await this.keyService.wrapMessageAESKey(encryptionResult.aesKey, senderEmail))})
+
+        for (const receiverEmail of receiverEmails) {
+            if(receiverEmail!==senderEmail){
+                messageKeyInfos.push({email: receiverEmail, isSender: false, isReceiver: true,
+                    key: new Uint8Array(await this.keyService.wrapMessageAESKey(encryptionResult.aesKey, receiverEmail))})
+            }
+        }
+        return {encryptedPayload: encryptionResult.encryptedData, messageKeysInfos: messageKeyInfos, iv: encryptionResult.iv};
     }
 
 
@@ -78,9 +92,9 @@ export class EncryptionService {
         return {
             id: encodedMessage.id,
             sender: encodedMessage.sender,
-            receiver: encodedMessage.receiver,
+            receivers: encodedMessage.receivers,
             date: date,
-            isRead: encodedMessage.isRead,
+            read: encodedMessage.read,
             subject: messagePayload.subject,
             text: messagePayload.text,
             attachments: messagePayload.attachments

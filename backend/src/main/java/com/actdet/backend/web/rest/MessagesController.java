@@ -22,7 +22,7 @@ import java.util.List;
 @RequestMapping("/messages")
 public class MessagesController {
 
-    private MessagesService messagesService;
+    private final MessagesService messagesService;
 
     private final ObjectMapper msgPackMapper;
 
@@ -34,30 +34,34 @@ public class MessagesController {
 
     @GetMapping(value = "/received", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<?> getReceivedMessages(Principal principal) throws JsonProcessingException {
-        List<Messages> messagesList = this.messagesService.getMessagesByReceiverEmail(principal.getName());
-        GetMessagesResponse getMessagesResponse = new GetMessagesResponse(messagesList);
-
+        GetMessagesResponse getMessagesResponse = new GetMessagesResponse(this.messagesService.getMessagesByReceiverEmail(principal.getName()));
         byte[] msgPackResponse = msgPackMapper.writeValueAsBytes(getMessagesResponse);
-
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).body(msgPackResponse);
     }
 
     @GetMapping(value = "/sent", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<?> getSentMessages(Principal principal) throws JsonProcessingException {
-        List<Messages> messagesList = this.messagesService.getMessagesBySenderEmail(principal.getName());
-        GetMessagesResponse getMessagesResponse = new GetMessagesResponse(messagesList);
-
+        GetMessagesResponse getMessagesResponse = new GetMessagesResponse(this.messagesService.getMessagesBySenderEmail(principal.getName()));
         byte[] msgPackResponse = msgPackMapper.writeValueAsBytes(getMessagesResponse);
-
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).body(msgPackResponse);
+    }
+
+    @GetMapping(value = "/read/{messageId}")
+    public ResponseEntity<?> markMessageAsRead(Principal principal, @PathVariable(name = "messageId") Long messageId){
+        try{
+            this.messagesService.markMessageAsReadForUser(principal.getName(), messageId);
+            return ResponseEntity.ok().build();
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
 
     @PostMapping(value = "/send", consumes = "application/x-msgpack")
     public ResponseEntity<?> sendMessage(Principal principal, @RequestBody SendMessageRequest request) {
         try {
-            this.messagesService.sendMessage(principal.getName(), request.getReceiverEmail(),
-                    request.getEncryptedMessage(), request.getKey(), request.getIv());
+            this.messagesService.sendMessage(principal.getName(),
+                    request.getEncryptedMessage(), request.getIv(), request.getMessageKeysInfos());
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

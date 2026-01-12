@@ -12,7 +12,7 @@ export class UserService {
     getUserInfo(){
         return this.http.get<GetUserInfoResponse>("/api/user", {withCredentials: true}).pipe(
             map(response => {
-                return {username: response.username}
+                return {username: response.username, email: response.email}
             }),
             shareReplay(1)
         )
@@ -22,6 +22,7 @@ export class UserService {
 
 export interface GetUserInfoResponse{
     username: string;
+    email: string;
 }
 
 export interface UserInfo{

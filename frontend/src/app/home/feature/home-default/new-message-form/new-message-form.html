@@ -7,13 +7,35 @@
         <form (submit)="onSend(); $event.preventDefault()">
             <mat-card-content class="card-content">
                 <div class="input-fields">
-                    <mat-form-field appearance="fill">
+                    <mat-form-field appearance="fill" class="full-width">
                         <mat-label>To</mat-label>
-                        <input matInput
-                               placeholder="Message recipient's username"
-                               [field]="newMessageForm.recipient">
-                        @if (newMessageForm.recipient().touched() && newMessageForm.recipient().invalid()) {
-                            <mat-error>{{ newMessageForm.recipient().errors().at(0)?.message }}</mat-error>
+                        <mat-chip-grid #chipGrid>
+                            @for (recipient of formModel().recipients; track recipient) {
+                                <mat-chip-row
+                                        (removed)="removeRecipient(recipient)"
+                                        [editable]="true"
+                                        (edited)="editRecipients(recipient, $event)"
+                                        class="recipient-chip"
+                                >
+                                    <button matChipEdit>
+                                        <mat-icon>edit</mat-icon>
+                                    </button>
+                                    {{recipient}}
+                                    <button matChipRemove>
+                                        <mat-icon>cancel</mat-icon>
+                                    </button>
+                                </mat-chip-row>
+                            }
+                            <input
+                                    placeholder="Message recipient's username"
+                                    [matChipInputFor]="chipGrid"
+                                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                                    [matChipInputAddOnBlur]="true"
+                                    (matChipInputTokenEnd)="addRecipient($event)"
+                            />
+                        </mat-chip-grid>
+                        @if (newMessageForm.recipients().touched() && newMessageForm.recipients().invalid()) {
+                            <mat-error>{{ newMessageForm.recipients().errors().at(0)?.message }}</mat-error>
                         }
                     </mat-form-field>
 

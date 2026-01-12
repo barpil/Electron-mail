@@ -26,10 +26,6 @@ public class Messages {
     @JoinColumn(name = "SENDER_ID", referencedColumnName = "USER_ID", nullable = false)
     private Users sender;
 
-    @ManyToOne
-    @JoinColumn(name = "RECEIVER_ID", referencedColumnName = "USER_ID", nullable = false)
-    private Users receiver;
-
     @Column(name = "SENT_DATE")
     @Generated
     @Getter
@@ -39,47 +35,31 @@ public class Messages {
     @Getter
     private byte[] encryptedMessage;
 
-    @Column(name = "ENCRYPTION_KEY")
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
     @Getter
-    private byte[] key;
+    @Setter
+    private List<MessageReceivers> receivers = new ArrayList<>();
+
 
     @Column(name = "IV")
     @Getter
     private byte[] iv;
 
-    @Column(name = "MESSAGE_READ")
-    @Getter
-    @Setter
-    private boolean read;
 
-    @Generated
-    @Column(name = "DELETED_BY_SENDER", insertable = false)
-    @Setter
-    @Getter
-    private boolean isDeletedBySender;
-    @Generated
-    @Column(name = "DELETED_BY_RECEIVER", insertable = false)
-    @Setter
-    @Getter
-    private boolean isDeletedByReceiver;
-
-    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
     @Getter
     @Setter
     private List<Attachments> attachments = new ArrayList<>();
 
     @Builder
-    public Messages(List<Attachments> attachments, Users sender, Users receiver, byte[] encryptedMessage, byte[] key, byte[] iv) {
+    public Messages(List<Attachments> attachments, Users sender, byte[] encryptedMessage, byte[] iv, List<MessageReceivers> messageReceivers) {
         this.attachments = attachments;
         this.sender = sender;
-        this.receiver = receiver;
         this.encryptedMessage = encryptedMessage;
-        this.key = key;
         this.iv = iv;
-        this.read = false;
+        this.receivers = messageReceivers;
     }
 
 
-    public String getReceiverEmail(){return this.receiver.getEmail();}
     public String getSenderEmail(){return this.sender.getEmail();}
 }

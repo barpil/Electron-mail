@@ -10,14 +10,22 @@
             </header>
 
             <div class="meta-section">
-                <div class="sender-info">
-                    <div class="sender-details">
+                <div class="user-info">
+                    <div class="user-details">
                         <div style="display: flex;flex-direction: row;gap: 6px;">
                             <span>From:</span>
-                            <span class="sender-name">{{ msg.sender }}</span>
+                            <span class="user-name">{{ msg.sender }}</span>
+                        </div>
+                        <div style="display: flex;flex-direction: row; justify-content: space-between">
+                            <div style="display: flex;flex-direction: row;gap: 6px;">
+                                <span>To:</span>
+                                <span class="user-name">{{ msg.receivers.join(', ') }}</span>
+                            </div>
+                            <span class="date-label">{{ msg.date | date: 'dd.MM.yyyy, HH:mm' }}</span>
                         </div>
 
-                        <span class="date-label">{{ msg.date | date: 'dd.MM.yyyy, HH:mm' }}</span>
+
+
                     </div>
                 </div>
             </div>

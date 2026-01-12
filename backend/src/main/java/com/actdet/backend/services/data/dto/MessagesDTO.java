@@ -16,7 +16,7 @@ import java.util.List;
 public class MessagesDTO{
     Long id;
     String sender;
-    String receiver;
+    List<String> receivers;
     LocalDateTime date;
     boolean isRead;
 
@@ -26,20 +26,22 @@ public class MessagesDTO{
     List<AttachmentsDTO> attachments;
 
 
-    public static MessagesDTO mapMessageToMessageDTO(Messages message){
+    public static MessagesDTO mapMessageKeyPairToMessageDTO(MessageInfo messageInfo){
+        Messages message = messageInfo.getMessage();
         return MessagesDTO.builder()
                 .id(message.getMessageId())
                 .sender(message.getSenderEmail())
-                .receiver(message.getReceiverEmail())
+                .receivers(messageInfo.getReceivers())
+                .isRead(messageInfo.isRead())
                 .date(message.getSentDate())
                 .encodedMessage(message.getEncryptedMessage())
-                .key(message.getKey())
+                .key(messageInfo.getKey())
                 .iv(message.getIv())
                 .attachments(AttachmentsDTO.mapAttachmentsToAttachmentDTOs(message.getAttachments()))
                 .build();
     }
 
-    public static List<MessagesDTO> mapMessagesToMessageDTOs(List<Messages> messages){
-        return messages.stream().map(MessagesDTO::mapMessageToMessageDTO).toList();
+    public static List<MessagesDTO> mapMessageKeyPairsToMessageDTOs(List<MessageInfo> messageInfo){
+        return messageInfo.stream().map(MessagesDTO::mapMessageKeyPairToMessageDTO).toList();
     }
 }

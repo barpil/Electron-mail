@@ -7,4 +7,5 @@ import lombok.Data;
 @Builder
 public class GetUserInfoResponse {
     private String username;
+    private String email;
 }

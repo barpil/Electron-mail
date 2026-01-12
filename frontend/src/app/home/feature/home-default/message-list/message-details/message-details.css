@@ -35,21 +35,24 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    width: 100%;
 }
 
-.sender-info {
+.user-info {
+    width: 100%;
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
 
-.sender-details {
+.user-details {
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
-.sender-name {
+.user-name {
     font-weight: 600;
     color: #202124;
 }

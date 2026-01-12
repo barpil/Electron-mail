@@ -15,7 +15,7 @@ export class RegisterService {
     private readonly keyService = inject(KeyService);
 
 
-    checkIfEmailIsAvailable(email: string) {
+    public checkIfEmailIsAvailable(email: string) {
         const body = new HttpParams()
             .set("value", email);
 
