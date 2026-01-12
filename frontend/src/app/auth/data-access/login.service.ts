@@ -1,13 +1,19 @@
 import {inject, Injectable} from '@angular/core';
 import {LoginFormModel} from "../feature/login-page/login-form/login-form";
-import {catchError, throwError} from "rxjs";
+import {catchError, concatMap, shareReplay, switchMap, tap, throwError} from "rxjs";
 import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams} from "@angular/common/http";
+import {decode} from "@msgpack/msgpack";
+import {GetMessagesResponse, MessageService} from "../../home/data-access/message-service";
+import {KeyService} from "../../shared/data-access/key-service";
 
 @Injectable({
     providedIn: 'root',
 })
 export class LoginService {
     private readonly http = inject(HttpClient);
+    private readonly keyService = inject(KeyService);
+    private readonly messageService = inject(MessageService);
+
 
     login(loginFormModel: LoginFormModel) {
         const body = new HttpParams()
@@ -28,6 +34,10 @@ export class LoginService {
                 } else {
                     return throwError(() => new Error("Unexpected error"));
                 }
+            }),
+            switchMap(async () => {
+                await this.keyService.loadEncryptionParametersFromServer();
+                return this.keyService.generateKEKWrapper(loginFormModel.password);
             })
         );
     }
@@ -36,20 +46,15 @@ export class LoginService {
         return this.http.post("/api/auth/logout", {}, {withCredentials: true}).pipe(
             catchError(error => {
                 return throwError(() => new Error("Unexpected error"));
+            }),
+            switchMap(() => {
+                this.messageService.clearCache();
+                return this.keyService.clearEncryptionData();
             })
         );
     }
 }
 
-export interface LoginRequest {
-    email: string;
-    password: string;
-}
-
-export interface LoginResponse {
-    token: string;
-    user: { id: string, email: string }
-}
 
 export class InvalidCredentialsError extends Error {
     constructor() {

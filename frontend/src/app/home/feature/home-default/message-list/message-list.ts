@@ -29,6 +29,7 @@ export class MessageList {
     readonly route = inject(ActivatedRoute);
     protected isLoading = signal(true);
 
+
     readonly messages = toSignal(
         combineLatest([
             this.route.queryParams,

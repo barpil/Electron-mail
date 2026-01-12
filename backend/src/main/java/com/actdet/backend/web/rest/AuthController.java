@@ -3,7 +3,9 @@ package com.actdet.backend.web.rest;
 import com.actdet.backend.services.data.UserService;
 import com.actdet.backend.web.rest.bodies.requests.AvailabilityRequest;
 import com.actdet.backend.web.rest.bodies.requests.RegisterRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,10 +30,10 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-
-    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<?> register(@ModelAttribute RegisterRequest request){
-        userService.registerUser(request.getEmail(), request.getUsername(), request.getPassword());
+    @PostMapping(value = "/register", consumes = "application/x-msgpack")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request){
+        userService.registerUser(request.getEmail(), request.getUsername(), request.getPassword(),
+                request.getPublic_key(), request.getEncrypted_private_key(), request.getSalt(), request.getIv());
         return ResponseEntity.ok().build();
     }
 

@@ -19,21 +19,45 @@ public class UserCredentials {
     @Getter
     private String hashedPassword;
 
+    @Column(name = "USER_PUBLIC_KEY")
+    @Getter
+    private byte[] rsaPublicKey;
+
+    @Column(name = "USER_ENCRYPTED_PRIVATE_KEY")
+    @Getter
+    private byte[] encryptedRsaPrivateKey;
+
+    @Column(name = "KEY_ENCRYPTION_SALT")
+    @Getter
+    private byte[] keyEncryptionSalt;
+
+    @Column(name = "KEY_ENCRYPTION_IV")
+    @Getter
+    private byte[] keyEncryptionIV;
+
+
     @MapsId
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "userId")
     private Users user;
 
-    private UserCredentials(String email, String username, String hashedPassword) {
+    private UserCredentials(String email, String username, String hashedPassword, byte[] rsaPublicKey,
+                            byte[] encryptedRsaPrivateKey, byte[] keyEncryptionSalt, byte[] keyEncryptionIV) {
         this.hashedPassword = hashedPassword;
+        this.rsaPublicKey = rsaPublicKey;
+        this.encryptedRsaPrivateKey = encryptedRsaPrivateKey;
+        this.keyEncryptionSalt = keyEncryptionSalt;
+        this.keyEncryptionIV = keyEncryptionIV;
         this.user = Users.builder()
                 .email(email)
                 .username(username)
                 .build();
     }
 
-    public static UserCredentials createUserRegistrationDto(String email, String username, String hashedPassword){
-        return new UserCredentials(email, username, hashedPassword);
+    public static UserCredentials createUserRegistrationDto(String email, String username, String hashedPassword, byte[] rsaPublicKey,
+                                                            byte[] encryptedRsaPrivateKey, byte[] keyEncryptionSalt, byte[] keyEncryptionIV){
+        return new UserCredentials(email, username, hashedPassword, rsaPublicKey, encryptedRsaPrivateKey,
+                keyEncryptionSalt, keyEncryptionIV);
     }
 
     public String getEmail() {

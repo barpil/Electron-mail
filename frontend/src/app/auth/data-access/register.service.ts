@@ -1,9 +1,10 @@
 import {inject, Injectable} from '@angular/core';
-import {catchError, debounceTime, delay, map, of, switchMap, throwError} from "rxjs";
+import {catchError, firstValueFrom, map, of, throwError} from "rxjs";
 import {RegisterFormModel} from "../feature/register-page/register-form/register-form.schema";
 import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams} from "@angular/common/http";
 import {InvalidCredentialsError} from "./login.service";
-import {email} from "@angular/forms/signals";
+import {encode} from "@msgpack/msgpack";
+import {KeyService} from "../../shared/data-access/key-service";
 
 
 @Injectable({
@@ -11,7 +12,7 @@ import {email} from "@angular/forms/signals";
 })
 export class RegisterService {
     private readonly http = inject(HttpClient);
-
+    private readonly keyService = inject(KeyService);
 
 
     checkIfEmailIsAvailable(email: string) {
@@ -50,19 +51,31 @@ export class RegisterService {
         )
     }
 
-    register(registerFormModel: RegisterFormModel) {
-        const body = new HttpParams()
-            .set('email', registerFormModel.email)
-            .set('username', registerFormModel.username)
-            .set('password', registerFormModel.password);
+    //Zastanowic sie czy przed wyslaniem hasla do backendu nie powinienem go dodatkowo zahashowac
+    //(tak zeby serwer nie znal hasla) analogicznie z loginem
+    async register(registerFormModel: RegisterFormModel) {
+        //Zastanowic się czy nie trzeba zabezpieczyć tego, żeby nie można było podawać cały czas haseł,
+        //i testować co powstaje
+        const wrapperParams = await this.keyService.generateAndSaveKEKWrapperParameters();
+        await this.keyService.generateKEKWrapper(registerFormModel.password);
+        const keyPair = await this.keyService.generateAndExportRsaKeyPair();
 
-        const headers = new HttpHeaders({
-            'Content-Type': 'application/x-www-form-urlencoded'
-        });
+        const requestBody = {
+            "email": registerFormModel.email,
+            "username": registerFormModel.username,
+            "password": registerFormModel.password,
+            "public_key": new Uint8Array(keyPair.publicKey),
+            "encrypted_private_key": new Uint8Array(keyPair.encryptedPrivateKey),
+            "salt": new Uint8Array(wrapperParams.salt),
+            "iv": new Uint8Array(wrapperParams.iv)
+        };
 
-        return this.http.post("/api/auth/register", body.toString(), {
-            headers: headers,
-            withCredentials: false
+        const binaryBlob = new Blob([new Uint8Array(encode(requestBody))], {type: "application/x-msgpack"});
+        return firstValueFrom(this.http.post("/api/auth/register", binaryBlob, {
+            withCredentials: false,
+            headers: new HttpHeaders({
+                "Content-Type": "application/x-msgpack"
+            })
         }).pipe(
             catchError((error: HttpErrorResponse) => {
                 if (error.status === 401) {
@@ -71,6 +84,6 @@ export class RegisterService {
                     return throwError(() => new Error("Unexpected error"));
                 }
             })
-        );
+        ));
     }
 }

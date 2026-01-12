@@ -53,7 +53,7 @@ export class RegisterForm {
         this.isLoading = true;
         submit(this.registerForm, async form => {
             try {
-                await firstValueFrom(this.registerService.register(form().value()))
+                await this.registerService.register(form().value())
                 if (!await this.router.navigate(['/login'])) {
                     throw new Error('Routing failed')
                 }

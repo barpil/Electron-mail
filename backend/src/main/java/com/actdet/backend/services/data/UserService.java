@@ -1,5 +1,6 @@
 package com.actdet.backend.services.data;
 
+import com.actdet.backend.services.data.dto.EncryptionDataDTO;
 import com.actdet.backend.services.data.repositories.UserCredentialsRepository;
 import com.actdet.backend.services.data.repositories.UsersRepository;
 import com.actdet.backend.services.data.repositories.entities.UserCredentials;
@@ -37,24 +38,44 @@ public class UserService {
     }
 
     public boolean isUsernameAvailable(String username){
-        if(username==null) return false; //Username nie moze byc pusty
+        if(username==null) return false;
         return !usersRepository.existsByUsername(username);
     }
 
     public boolean isEmailAvailable(String email){
-        if(email==null) return false; //Email nie moze byc pusty
+        if(email==null) return false;
         return !usersRepository.existsByEmail(email);
     }
 
+    public Optional<EncryptionDataDTO> getEncryptionDataByUserEmail(String email) {
+        if(email==null) return Optional.empty();
+        var opt = userCredentialsRepository.findUserCredentialsByUser_Email(email);
+        return opt.map(userCredentials ->
+                new EncryptionDataDTO(userCredentials.getEncryptedRsaPrivateKey(), userCredentials.getKeyEncryptionSalt(),
+                        userCredentials.getKeyEncryptionIV()));
+    }
+
+
+    public Optional<byte[]> getPublicKeyByEmail(String email){
+        if(email==null) return Optional.empty();
+        var opt = userCredentialsRepository.findUserCredentialsByUser_Email(email);
+        return opt.map(UserCredentials::getRsaPublicKey);
+    }
 
     /*
     DO DODANIA KONTROLA DOSTEPNOSCI NAZW UZYTKOWNIKA I EMAILI Z DODATKOWYM POTIWERDZANIEM ICH PRZY REJESTRACJI
     WE FRONTENDZIE
      */
-    public UserCredentials registerUser(String email, String username, String password) throws DataAccessException {
+    public UserCredentials registerUser(String email, String username, String password, byte[] rsaPublicKey,
+                                        byte[] encryptedRsaPrivateKey, byte[] encryptionSalt, byte[] encryptionIV) throws DataAccessException {
         String hashedPassword = passwordEncoder.encode(password);
-        UserCredentials userDto = UserCredentials.createUserRegistrationDto(email, username, hashedPassword);
+        UserCredentials userDto = UserCredentials.createUserRegistrationDto(email, username, hashedPassword, rsaPublicKey,
+                encryptedRsaPrivateKey, encryptionSalt, encryptionIV);
         return userCredentialsRepository.save(userDto);
     }
 
 }
+
+
+
+

@@ -5,9 +5,9 @@ import {EncodedMessageDto} from "./dto/encoded-message-dto";
 import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
 import {decode, encode} from "@msgpack/msgpack";
 import {MessageDto} from "./dto/message-dto";
-import {EncryptionService} from "../util/encryption-service";
 import {MessagePayloadDto} from "../util/dto/message-payload-dto";
 import {AttachmentsDto} from "./dto/attachments-dto";
+import {EncryptionService} from "../../shared/data-access/encryption-service";
 
 
 @Injectable({
@@ -26,6 +26,10 @@ export class MessageService {
     refresh(){this.refreshTrigger$.next();}
     get refresh$(){return this.refreshTrigger$.asObservable()}
 
+    public clearCache(){
+        this.messagesCache$ = undefined;
+        this.sentMessagesCache$ = undefined;
+    }
 
     getMessages(forceRefresh = false): Observable<MessageDto[]> {
         if (forceRefresh || !this.messagesCache$) {
@@ -90,7 +94,7 @@ export class MessageService {
         };
 
         const encryptionResult = await this.encryptionService
-            .encryptMessagePayload(messagePayload);
+            .encryptMessagePayload(messagePayload, messageForm.recipient);
 
 
         const requestBody: SendMessageRequest = {
@@ -100,6 +104,7 @@ export class MessageService {
             iv: new Uint8Array(encryptionResult.iv)
         }
 
+        //Moze te 2 liniki ponizej zamienic na: const binaryBlob = new Blob([new Uint8Array(encode(requestBody))], {type: "application/x-msgpack"});
         const msgPackBody: Uint8Array = encode(requestBody);
         const binaryBlob = new Blob([msgPackBody.buffer as ArrayBuffer], {type: "application/x-msgpack"})
         return this.http.post("/api/messages/send", binaryBlob, {
