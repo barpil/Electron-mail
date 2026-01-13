@@ -1,5 +1,7 @@
 package com.actdet.backend.configurations;
 
+import com.actdet.backend.configurations.filters.RequestSizeLimitFilter;
+import com.actdet.backend.configurations.filters.TwoFactorAuthFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
 import org.springframework.session.security.SpringSessionBackedSessionRegistry;
@@ -29,6 +32,7 @@ public class SecurityConfig {
     razem z innymi sesjami. (poniewaz expiration time jest zaindeksowany i tak jest szybciej)
     */
     private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
+
 
     @Autowired
     public SecurityConfig(FindByIndexNameSessionRepository<? extends Session> sessionRepository,
@@ -51,10 +55,13 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, SpringSessionBackedSessionRegistry<? extends Session> sessionRegistry) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, SpringSessionBackedSessionRegistry<? extends Session> sessionRegistry,
+                                           TwoFactorAuthFilter tfaFilter, RequestSizeLimitFilter sizeLimitFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .requestCache(cache -> cache.disable())
+                .addFilterAfter(tfaFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(sizeLimitFilter, TwoFactorAuthFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health").access(
                                 new WebExpressionAuthorizationManager(
@@ -70,6 +77,7 @@ public class SecurityConfig {
                         .passwordParameter("password")
 
                         .successHandler((request, response, authentication) -> {
+                            request.getSession().setAttribute("2FA_AUTHENTICATED", false);
                             response.setStatus(HttpServletResponse.SC_OK);
                         })
                         .failureHandler((request, response, exception) -> {
@@ -105,6 +113,18 @@ public class SecurityConfig {
     public SpringSessionBackedSessionRegistry<? extends Session> sessionRegistry() {
         return new SpringSessionBackedSessionRegistry<>(this.sessionRepository);
     }
+
+    @Bean
+    public TwoFactorAuthFilter tfaFilter(){
+        return new TwoFactorAuthFilter();
+    }
+
+    @Bean
+    public RequestSizeLimitFilter requestSizeFilter(){
+        return new RequestSizeLimitFilter();
+    }
+
+
 
 
 

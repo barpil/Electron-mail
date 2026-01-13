@@ -1,0 +1,53 @@
+<mat-card class="tfa-card">
+    <mat-card-header>
+        <mat-card-title>Two-Factor Authentication</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content class="card-content"> @if (isLoading()) {
+        <div class="spinner-container">
+            <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+        </div>
+    } @else {
+        @if (isSetupMode() && totpUri()) {
+            <div class="qr-container">
+                <p>Scan this QR code with your authenticator app:</p>
+                <qrcode
+                        [qrdata]="totpUri()!"
+                        [width]="200"
+                        [errorCorrectionLevel]="'M'">
+                </qrcode>
+            </div>
+        }
+
+        <form (submit)="submitTfaForm()" class="input-fields">
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Verification Code</mat-label>
+                <input matInput
+                       [field]="tfaForm.code"
+                       inputmode="numeric"
+                       (input)="limitLength($event)"> @if (tfaForm.code().errors(); as errors) {
+                @for (error of errors; track error.kind) {
+                    <mat-error>{{ error.message }}</mat-error>
+                }
+            }
+            </mat-form-field>
+
+            @if (tfaForm().errors(); as globalErrors) {
+                @for (error of globalErrors; track error.kind) {
+                    <p class="error-text">{{ error.message }}</p>
+                }
+            }
+
+            <mat-card-actions align="end">
+                <button mat-raised-button
+                        color="primary"
+                        type="submit"
+                        [disabled]="tfaForm().invalid() || isLoading()"
+                        class="submit-button">
+                    Verify
+                </button>
+            </mat-card-actions>
+        </form>
+    }
+    </mat-card-content>
+</mat-card>

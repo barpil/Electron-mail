@@ -4,11 +4,24 @@ import {MessageList} from "./home/feature/home-default/message-list/message-list
 import {MessageDetails} from "./home/feature/home-default/message-list/message-details/message-details";
 import {NewMessageForm} from "./home/feature/home-default/new-message-form/new-message-form";
 import {SessionAuthChildGuard, SessionAuthGuard} from "./guards/session-auth-guard";
+import {TfaForm} from "./auth/feature/login-page/tfa-form/tfa-form";
+import {LoginForm} from "./auth/feature/login-page/login-form/login-form";
 
 export const routes: Routes = [
     {
         path: 'login',
-        loadComponent: () => import('./auth/feature/login-page/login-page').then((m) => m.LoginPage)
+        loadComponent: () => import('./auth/feature/login-page/login-page').then((m) => m.LoginPage),
+        children: [
+            {
+                path: '',
+                component: LoginForm
+            },
+            {
+                path: '2fa',
+                component: TfaForm,
+                canActivateChild: [SessionAuthChildGuard]
+            }
+        ]
     },
     {
         path: 'register',

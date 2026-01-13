@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Generated;
 
 @Entity(name = "USERS")
@@ -12,15 +13,21 @@ import org.hibernate.annotations.Generated;
 public class Users {
 
     @Id
-    @Generated
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "USER_ID")
     @Getter
     private String userId;
 
+    @Getter
     @Column(name = "EMAIL", nullable = false, unique = true, length = 50)
     private String email;
+    @Getter
     @Column(name = "USERNAME", nullable = false, unique = true, length = 50)
     private String username;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @Setter
+    private TfaCredentials tfaCredentials;
 
     @Builder
     public Users(String email, String username) {
@@ -28,11 +35,9 @@ public class Users {
         this.username = username;
     }
 
-    public String getEmail() {
-        return email;
+    public void addTfaCredentials(TfaCredentials creds) {
+        this.tfaCredentials = creds;
+        creds.setUser(this);
     }
 
-    public String getUsername() {
-        return username;
-    }
 }

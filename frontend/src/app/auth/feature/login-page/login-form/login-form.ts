@@ -5,7 +5,7 @@ import {customError, email, Field, form, maxLength, required, schema, submit} fr
 import {MatButton} from "@angular/material/button";
 import {InvalidCredentialsError, LoginService} from "../../../data-access/login.service";
 import {firstValueFrom} from "rxjs";
-import {Router} from "@angular/router";
+import {Router, RouterLink} from "@angular/router";
 import {MatProgressSpinner} from "@angular/material/progress-spinner";
 
 @Component({
@@ -22,7 +22,8 @@ import {MatProgressSpinner} from "@angular/material/progress-spinner";
         MatCardActions,
         MatButton,
         MatError,
-        MatProgressSpinner
+        MatProgressSpinner,
+        RouterLink
     ],
     templateUrl: './login-form.html',
     styleUrl: './login-form.css',
@@ -45,7 +46,7 @@ export class LoginForm {
         submit(this.loginForm, async form => {
             try {
                 await firstValueFrom(this.loginService.login(form().value()));
-                if (!await this.router.navigate(['/inbox'])) {
+                if (!await this.router.navigate(['/login', '2fa'])) {
                     throw new Error('Routing failed');
                 }
                 return undefined; //jesli undefined to wszystko zadzialalo

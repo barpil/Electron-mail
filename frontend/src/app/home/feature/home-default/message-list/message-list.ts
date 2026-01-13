@@ -8,6 +8,10 @@ import {MatProgressSpinner} from "@angular/material/progress-spinner";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {MessageService} from "../../../data-access/message-service";
 import {MessageDto} from "../../../data-access/dto/message-dto";
+import {MatIcon} from "@angular/material/icon";
+import {MatIconButton} from "@angular/material/button";
+import {MatTooltip} from "@angular/material/tooltip";
+import {MatCheckbox} from "@angular/material/checkbox";
 
 @Component({
     selector: 'app-message-list',
@@ -17,7 +21,11 @@ import {MessageDto} from "../../../data-access/dto/message-dto";
         DatePipe,
         MatDivider,
         RouterLink,
-        MatProgressSpinner
+        MatProgressSpinner,
+        MatIcon,
+        MatIconButton,
+        MatTooltip,
+        MatCheckbox
     ],
     templateUrl: './message-list.html',
     styleUrl: './message-list.css',
@@ -28,7 +36,7 @@ export class MessageList {
 
     readonly route = inject(ActivatedRoute);
     protected isLoading = signal(true);
-
+    protected selectedMessagesIds = signal<Set<number>>(new Set());
 
     readonly messages = toSignal(
         combineLatest([
@@ -58,11 +66,37 @@ export class MessageList {
             return;
         }
         try{
-            await firstValueFrom(this.messageService.markMessageAsRead(message.id));
+            await firstValueFrom(this.messageService.markMessagesAsRead([message.id]));
         }catch(e){
             this.showSnackBarError("Could not mark specified message as read.")
         }
     }
+
+    protected selectMessage(messageId: number){
+        this.selectedMessagesIds.update(selection => {
+            const newSelection = new Set(selection);
+            if(newSelection.has(messageId)) newSelection.delete(messageId);
+            else newSelection.add(messageId);
+            return newSelection;
+        })
+    }
+
+    protected async deleteSelectedMessages(){
+        await firstValueFrom(this.messageService.deleteMessages([...this.selectedMessagesIds().values()]));
+        this.selectedMessagesIds.update(() => {
+            return new Set();
+        })
+        this.messageService.refresh();
+    }
+
+    protected async markAsReadSelectedMessages(){
+       await firstValueFrom(this.messageService.markMessagesAsRead([...this.selectedMessagesIds().values()]));
+        this.selectedMessagesIds.update(() => {
+            return new Set();
+        })
+       this.messageService.refresh();
+    }
+
 
     private showSnackBarError(message: string){
         this.snackBar.open(message, "Close",

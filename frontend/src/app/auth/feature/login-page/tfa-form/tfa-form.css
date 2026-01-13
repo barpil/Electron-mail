@@ -1,0 +1,95 @@
+.tfa-card {
+    max-width: 450px;
+    margin: 40px auto;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.card-content {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+}
+
+/* Kontener QR z efektem "karty" wewnątrz */
+.qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+/* Stylizacja samej biblioteki qrcode */
+.qr-container qrcode {
+    display: flex;
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.qr-container p {
+    font-size: 0.95rem;
+    color: #616161;
+    text-align: center;
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+/* Formularz i przyciski */
+.input-fields {
+    display: flex;
+    flex-direction: column;
+    input {
+        font-size: 2rem !important; /* Rozmiar tekstu (np. 32px) */
+        font-weight: bold;
+        letter-spacing: 8px;      /* Dodaje odstęp między cyframi kodu */
+        text-align: center;       /* Centruje kod (opcjonalnie) */
+        padding: 10px 0;
+    }
+
+}
+
+.full-width {
+    width: 100%;
+}
+
+.submit-button {
+    width: 100%; /* Na mobile przycisk na całą szerokość */
+    padding: 8px 0;
+    font-weight: 500;
+}
+
+@media (min-width: 600px) {
+    .submit-button {
+        width: auto; /* Na desktopie wraca do standardu */
+        min-width: 150px;
+    }
+}
+
+.error-text {
+    color: #d32f2f;
+    background-color: #ffebee;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    margin: 10px 0;
+    text-align: center;
+    border: 1px solid #ffcdd2;
+}
+
+.spinner-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 250px;
+}
+
+mat-card-actions {
+    padding: 16px 0 0 0 !important;
+}

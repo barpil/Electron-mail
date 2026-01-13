@@ -1,3 +1,19 @@
+<div class="list-actions">
+    <button mat-icon-button (click)="markAsReadSelectedMessages()"
+            [disabled]="selectedMessagesIds().size === 0"
+            matTooltip="Mark as read">
+        <mat-icon>mail</mat-icon>
+    </button>
+    <button mat-icon-button (click)="deleteSelectedMessages()"
+            [disabled]="selectedMessagesIds().size === 0"
+            matTooltip="Delete selected">
+        <mat-icon>delete</mat-icon>
+    </button>
+    @if (selectedMessagesIds().size > 0) {
+        <span class="selection-count">Selected: {{ selectedMessagesIds().size }}</span>
+    }
+</div>
+
 @if (isLoading()) {
     <div class="loading-container">
         <mat-spinner strokeWidth="7" diameter="100"></mat-spinner>
@@ -5,20 +21,28 @@
 } @else {
     <mat-nav-list class="message-list">
         @for (message of messages(); track message.id) {
-            <a mat-list-item
-               [class.unread-item]="!message.read"
-               [routerLink]="['.', message.id]"
-               (click)="onMessageRead($event, message)"
-            >
+            <div class="list-item-wrapper">
+                <a mat-list-item
+                   [class.unread-item]="!message.read"
+                   [routerLink]="['.', message.id]"
+                   (click)="onMessageRead($event, message)"
+                >
             <span matListItemTitle class="message-header">
                 <span class="sender-name">{{ message.sender }}</span>
                 <span class="message-date">{{ message.date | date:'shortDate' }}</span>
             </span>
 
-                <span matListItemLine class="message-subject">
+                    <span matListItemLine class="message-subject">
             {{ message.subject }}
             </span>
-            </a>
+                </a>
+                <mat-checkbox
+                        class="message-checkbox"
+                        [checked]="selectedMessagesIds().has(message.id)"
+                        (change)="selectMessage(message.id)"
+                        (click)="$event.stopPropagation()">
+                </mat-checkbox>
+            </div>
             <mat-divider></mat-divider>
         } @empty {
             <div class="empty-state">Message list is empty!</div>

@@ -13,7 +13,7 @@ import {
 } from "rxjs";
 import {NewMessageFormModel} from "../feature/home-default/new-message-form/new-message-form";
 import {EncodedMessageDto} from "./dto/encoded-message-dto";
-import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
+import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams} from "@angular/common/http";
 import {decode, encode} from "@msgpack/msgpack";
 import {MessageDto} from "./dto/message-dto";
 import {MessagePayloadDto} from "../util/dto/message-payload-dto";
@@ -36,7 +36,10 @@ export class MessageService {
     private messagesCache$?: Observable<MessageDto[]>;
     private sentMessagesCache$?: Observable<MessageDto[]>;
 
-    refresh(){this.refreshTrigger$.next();}
+    refresh(){
+        this.clearCache();
+        this.refreshTrigger$.next();
+    }
     get refresh$(){return this.refreshTrigger$.asObservable()}
 
     public clearCache(){
@@ -89,10 +92,20 @@ export class MessageService {
         )
     }
 
-    markMessageAsRead(messageId: number){
-        return this.http.get<GetUserInfoResponse>(`/api/messages/read/${messageId}`, {withCredentials: true}).pipe(
+    markMessagesAsRead(messagesIds: number[]){
+        const params = new HttpParams().set("messages", messagesIds.join(','))
+        return this.http.get(`/api/messages/read`, {withCredentials: true, params: params}).pipe(
             catchError(err => {
-                throw new Error("Message could not be mark as read.")
+                throw new Error("Messages could not be mark as read.")
+            })
+        )
+    }
+
+    deleteMessages(messagesIds: number[]){
+        const params = new HttpParams().set("messages", messagesIds.join(','))
+        return this.http.delete(`/api/messages/delete`, {withCredentials: true, params: params}).pipe(
+            catchError(err => {
+                throw new Error("Messages could not be deleted.")
             })
         )
     }

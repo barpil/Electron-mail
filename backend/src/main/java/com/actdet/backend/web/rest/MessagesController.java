@@ -46,10 +46,10 @@ public class MessagesController {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).body(msgPackResponse);
     }
 
-    @GetMapping(value = "/read/{messageId}")
-    public ResponseEntity<?> markMessageAsRead(Principal principal, @PathVariable(name = "messageId") Long messageId){
+    @GetMapping(value = "/read")
+    public ResponseEntity<?> markMessageAsRead(Principal principal, @RequestParam(name = "messages") List<Long> messageIds){
         try{
-            this.messagesService.markMessageAsReadForUser(principal.getName(), messageId);
+            this.messagesService.markMessageAsReadForUser(principal.getName(), messageIds);
             return ResponseEntity.ok().build();
         }catch(Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -69,9 +69,9 @@ public class MessagesController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteMessages(Principal principal, @ModelAttribute DeleteMessagesRequest request) {
+    public ResponseEntity<?> deleteMessages(Principal principal, @RequestParam(name = "messages") List<Long> messagesIds) {
         try {
-            this.messagesService.deleteMessages(principal.getName(), request.getMessageIdsToDelete());
+            this.messagesService.deleteMessages(principal.getName(),messagesIds);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

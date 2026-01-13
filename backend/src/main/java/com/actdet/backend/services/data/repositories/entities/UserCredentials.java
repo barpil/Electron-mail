@@ -1,17 +1,15 @@
 package com.actdet.backend.services.data.repositories.entities;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Generated;
 
 @Entity(name = "USER_CREDENTIALS")
 @NoArgsConstructor
 public class UserCredentials {
 
     @Id
-    @Generated
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "USER_ID")
     private String userId;
 
@@ -36,9 +34,11 @@ public class UserCredentials {
     private byte[] keyEncryptionIV;
 
 
-    @MapsId
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "userId")
+    @MapsId
+    @Getter
     private Users user;
 
     private UserCredentials(String email, String username, String hashedPassword, byte[] rsaPublicKey,

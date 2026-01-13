@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -46,11 +47,15 @@ public class MessagesService {
     }
 
     @Transactional
-    public void markMessageAsReadForUser(String email, Long messageId){
-        MessageReceivers messageReceivers = this.messageReceiversRepository.findMessageReceiversByMessage_MessageIdAndReceiver_Email(messageId, email)
-                .orElseThrow(() -> new IllegalArgumentException("Specified message does not exist for this user"));
-        messageReceivers.setRead(true);
-        this.messageReceiversRepository.save(messageReceivers);
+    public void markMessageAsReadForUser(String email, List<Long> messageIds){
+        List<MessageReceivers> messageReceivers = new ArrayList<>();
+        messageIds.forEach(id -> {
+            MessageReceivers messageReceiver = this.messageReceiversRepository.findMessageReceiversByMessage_MessageIdAndReceiver_Email(id, email)
+                    .orElseThrow(() -> new IllegalArgumentException("Specified message does not exist for this user"));
+            messageReceiver.setRead(true);
+            messageReceivers.add(messageReceiver);
+        });
+        this.messageReceiversRepository.saveAll(messageReceivers);
     }
 
 

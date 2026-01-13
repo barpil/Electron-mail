@@ -1,4 +1,4 @@
-<mat-card appearance="outlined">
+<mat-card appearance="outlined" class="login-form">
     <mat-card-header>
         <mat-card-title>Sign in</mat-card-title>
     </mat-card-header>
@@ -50,3 +50,9 @@
         <mat-error>{{loginForm().errors().at(0)!.message}}</mat-error>
     }
 </mat-card>
+<div class="icon-text-in-line bottom-text">
+    <span>Don't have an account?  </span>
+    <button mat-button color="primary" routerLink="/register">
+        Sign up
+    </button>
+</div>

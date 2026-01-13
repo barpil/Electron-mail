@@ -1,14 +1,10 @@
-import { Component } from '@angular/core';
-import {LoginForm} from "./login-form/login-form";
-import {MatButton} from "@angular/material/button";
-import {RouterLink} from "@angular/router";
+import {Component} from '@angular/core';
+import {RouterOutlet} from "@angular/router";
 
 @Component({
   selector: 'app-login-page',
     imports: [
-        LoginForm,
-        MatButton,
-        RouterLink
+        RouterOutlet
     ],
   templateUrl: './login-page.html',
   styleUrl: './login-page.css',

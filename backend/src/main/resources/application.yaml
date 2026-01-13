@@ -9,9 +9,14 @@ spring:
 
 
 server:
+
   servlet:
+  
     session.cookie.name: SESSION
     context-path: /api
+
+
+
 
 
 

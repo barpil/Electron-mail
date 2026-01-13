@@ -13,18 +13,14 @@ export class KeyService {
     private readonly http = inject(HttpClient);
     private readonly db: Promise<IDBPDatabase>;
 
+    private initPromise: Promise<void> | null = null;
+
     constructor() {
         this.db = openDB("ElectronDB", 1, {
             upgrade(db) {
                 db.createObjectStore("keys");
             }
         });
-        // try{
-        //     this.loadEncryptionParametersFromServer();
-        // }catch(e){
-        //     this.router.navigate(["/login"], {queryParams: {redirectTo: "/inbox"}});
-        // }
-
     }
 
 
@@ -68,7 +64,7 @@ export class KeyService {
         let encodedRpk = await db.get("keys", "rpk");
         if (!encodedRpk){
             await this.loadEncryptionParametersFromServer()
-            let encodedRpk = await db.get("keys", "rpk");
+            encodedRpk = await db.get("keys", "rpk");
             if(!encodedRpk) throw new Error("RPK could not be found nor initialized");
         }
         return await this.unwrapPrivateKeyWithKek(encodedRpk);
@@ -139,6 +135,7 @@ export class KeyService {
     }
 
     private async getKekKey() {
+        // await this.ensureInitialized();
         const base64Kek = sessionStorage.getItem("kek");
         if (!base64Kek) throw new Error("KEK not initialized");
         const kekKey = Uint8Array.from(atob(base64Kek), c => c.codePointAt(0)!);
@@ -149,7 +146,7 @@ export class KeyService {
         const db = await this.db;
         let wrapIv: Promise<Uint8Array> = await db.get("keys", "iv");
         if (!wrapIv){
-            await this.loadEncryptionParametersFromServer()
+            await this.ensureInitialized();
             wrapIv = await db.get("keys", "iv");
             if(!wrapIv) throw new Error("IV could not be found nor initialized");
         }
@@ -160,7 +157,7 @@ export class KeyService {
         const db = await this.db;
         let salt: Promise<Uint8Array> = await db.get("keys", "salt");
         if (!salt){
-            await this.loadEncryptionParametersFromServer()
+            await this.ensureInitialized();
             salt = await db.get("keys", "salt");
             if(!salt) throw new Error("Salt could not be found nor initialized");
         }
@@ -177,6 +174,9 @@ export class KeyService {
     }
 
     private async unwrapPrivateKeyWithKek(wrappedPrivateKey: ArrayBuffer) {
+        if (!wrappedPrivateKey || wrappedPrivateKey.byteLength === 0) {
+            throw new Error("Invalid wrappedPrivateKey: buffer is empty or undefined");
+        }
         const kekKey = await this.getKekKey();
         const wrapIv = await this.getWrapIv();
         if (!kekKey || !wrapIv) throw new Error("Kek not initialized");
@@ -194,11 +194,17 @@ export class KeyService {
     }
 
     public async unwrapMessageAESKey(wrappedAESKey: ArrayBuffer) {
+        await this.ensureInitialized();
         const privateKey = await this.getPrivateKey()
         return await globalThis.crypto.subtle.unwrapKey(
             "raw", wrappedAESKey, privateKey, {name: "RSA-OAEP"}, {name: "AES-GCM", length: 128},
             true, ["decrypt"]
         );
+    }
+
+    public async ensureInitialized() {
+        this.initPromise ??= this.loadEncryptionParametersFromServer();
+        return this.initPromise;
     }
 
 }
